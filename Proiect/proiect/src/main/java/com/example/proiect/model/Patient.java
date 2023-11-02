@@ -3,8 +3,9 @@ package com.example.proiect.model;
 import java.time.LocalDate;
 
 public class Patient {
-    private String cnp;
+    private Long id_patient;
     private Long id_user;
+    private String cnp;
     private String last_name;
     private String first_name;
     private String email;
@@ -20,12 +21,12 @@ public class Patient {
         this.cnp = cnp;
     }
 
-    public Long getId_user() {
-        return id_user;
+    public Long getId_patient() {
+        return id_patient;
     }
 
-    public void setId_user(Long id_user) {
-        this.id_user = id_user;
+    public void setId_patient(Long id_patient) {
+        this.id_patient = id_patient;
     }
 
     public String getLast_name() {
@@ -76,4 +77,11 @@ public class Patient {
         this.is_active = is_active;
     }
 
+    public Long getId_user() {
+        return id_user;
+    }
+
+    public void setId_user(Long id_user) {
+        this.id_user = id_user;
+    }
 }

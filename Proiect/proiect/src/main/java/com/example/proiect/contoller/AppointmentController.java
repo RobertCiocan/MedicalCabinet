@@ -23,11 +23,22 @@ public class AppointmentController {
         Appointment createdAppointment = appointmentService.createAppointment(appointment);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
     }
-
+    @GetMapping("/{idAppointment}")
+    public ResponseEntity<Appointment> getAppointment(@PathVariable Long idAppointment){
+        Appointment appointment = appointmentService.getAppointment(idAppointment);
+        if (appointment != null) {
+            return ResponseEntity.ok(appointment);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
     @GetMapping("/{idPatient}/{idPhysician}/{date}")
-    public ResponseEntity<Appointment> getAppointment(
-            @PathVariable int idPatient, @PathVariable int idPhysician, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        Appointment appointment = appointmentService.getAppointment(idPatient, idPhysician, date);
+    public ResponseEntity<Appointment> getAppointmentByParam(
+            @PathVariable int idPatient,
+            @PathVariable int idPhysician,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ){
+        Appointment appointment = appointmentService.getAppointmentByParams(idPatient, idPhysician, date);
         if (appointment != null) {
             return ResponseEntity.ok(appointment);
         } else {
@@ -40,11 +51,10 @@ public class AppointmentController {
         return appointmentService.getAllAppointments();
     }
 
-    @PutMapping("/{idPatient}/{idPhysician}/{date}")
-    public ResponseEntity<Appointment> updateAppointment(
-            @PathVariable int idPatient, @PathVariable int idPhysician, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestBody Appointment updatedAppointment) {
-        Appointment appointment = appointmentService.updateAppointment(idPatient, idPhysician, date, updatedAppointment);
+    @PutMapping("/{idAppointment}")
+    public ResponseEntity<Appointment> updateAppointment(@PathVariable Long idAppointment){
+        Appointment updatedAppointment = appointmentService.getAppointment(idAppointment);
+        Appointment appointment = appointmentService.updateAppointment(idAppointment, updatedAppointment);
         if (appointment != null) {
             return ResponseEntity.ok(appointment);
         } else {
@@ -52,10 +62,9 @@ public class AppointmentController {
         }
     }
 
-    @DeleteMapping("/{idPatient}/{idPhysician}/{date}")
-    public ResponseEntity<String> deleteAppointment(
-            @PathVariable int idPatient, @PathVariable int idPhysician, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        boolean deleted = appointmentService.deleteAppointment(idPatient, idPhysician, date);
+    @DeleteMapping("/{idAppointment}")
+    public ResponseEntity<String> deleteAppointment(@PathVariable Long idAppointment){
+        boolean deleted = appointmentService.deleteAppointment(idAppointment);
         if (deleted) {
             return ResponseEntity.ok("Appointment deleted successfully.");
         } else {

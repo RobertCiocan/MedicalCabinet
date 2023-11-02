@@ -5,12 +5,13 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class PhysicianService {
     private List<Physician> physicians = new ArrayList<>();
-    private int physicianIdCounter = 1;
+    private Long physicianIdCounter = 1L;
 
     public Physician createPhysician(Physician physician) {
         physician.setId_physician(physicianIdCounter++);
@@ -22,14 +23,14 @@ public class PhysicianService {
         return physicians;
     }
 
-    public Physician getPhysician(int id) {
+    public Physician getPhysician(Long id) {
         return physicians.stream()
-                .filter(physician -> physician.getId_physician() == id)
+                .filter(physician -> Objects.equals(physician.getId_physician(), id))
                 .findFirst()
                 .orElse(null);
     }
 
-    public Physician updatePhysician(int id, Physician updatedPhysician) {
+    public Physician updatePhysician(Long id, Physician updatedPhysician) {
         Physician existingPhysician = getPhysician(id);
         if (existingPhysician != null) {
             existingPhysician.setEmail(updatedPhysician.getEmail());
@@ -40,7 +41,7 @@ public class PhysicianService {
         return null;
     }
 
-    public boolean deletePhysician(int id) {
+    public boolean deletePhysician(Long id) {
         Physician physician = getPhysician(id);
         if (physician != null) {
             physicians.remove(physician);

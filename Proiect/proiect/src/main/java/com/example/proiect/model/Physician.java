@@ -1,7 +1,7 @@
 package com.example.proiect.model;
 
 public class Physician {
-    private int id_physician;
+    private Long id_physician;
     private Long id_user;
     private String last_name;
     private String first_name;
@@ -9,11 +9,11 @@ public class Physician {
     private String phone_nr;
     private String specialization;
 
-    public int getId_physician() {
+    public Long getId_physician() {
         return id_physician;
     }
 
-    public void setId_physician(int id_physician) {
+    public void setId_physician(Long id_physician) {
         this.id_physician = id_physician;
     }
 

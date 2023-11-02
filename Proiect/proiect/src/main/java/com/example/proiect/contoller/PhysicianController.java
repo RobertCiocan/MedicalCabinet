@@ -23,7 +23,7 @@ public class PhysicianController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Physician> getPhysician(@PathVariable int id) {
+    public ResponseEntity<Physician> getPhysician(@PathVariable Long id) {
         Physician physician = physicianService.getPhysician(id);
         if (physician != null) {
             return ResponseEntity.ok(physician);
@@ -38,7 +38,7 @@ public class PhysicianController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Physician> updatePhysician(@PathVariable int id, @RequestBody Physician updatedPhysician) {
+    public ResponseEntity<Physician> updatePhysician(@PathVariable Long id, @RequestBody Physician updatedPhysician) {
         Physician physician = physicianService.updatePhysician(id, updatedPhysician);
         if (physician != null) {
             return ResponseEntity.ok(physician);
@@ -48,7 +48,7 @@ public class PhysicianController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePhysician(@PathVariable int id) {
+    public ResponseEntity<String> deletePhysician(@PathVariable Long id) {
         boolean deleted = physicianService.deletePhysician(id);
         if (deleted) {
             return ResponseEntity.ok("Physician deleted successfully.");
@@ -76,12 +76,12 @@ public class PhysicianController {
             @RequestParam(name = "page") int page,
             @RequestParam(name = "items_per_page", defaultValue = "10") int itemsPerPage
     ) {
-        List<Physician> physicians = physicianService.getPhysiciansPages(page, itemsPerPage);
+        List<Physician> paginated_physicians = physicianService.getPhysiciansPages(page, itemsPerPage);
 
-        if (physicians.isEmpty()) {
+        if (paginated_physicians.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok(physicians);
+        return ResponseEntity.ok(paginated_physicians);
     }
 }

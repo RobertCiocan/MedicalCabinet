@@ -28,7 +28,7 @@ public class PatientService{
         return appointment;
     }
     public Patient createPatient(Patient patient) {
-        patient.setId_user(patientIdCounter++);
+        patient.setId_patient(patientIdCounter++);
 
         patient.setBirth_date(getBirthDateFromCnp(patient.getCnp()));
 
@@ -57,7 +57,7 @@ public class PatientService{
 
     public Patient findPatientById(Long id) {
         return patients.stream()
-                .filter(patient -> patient.getId_user().equals(id))
+                .filter(patient -> patient.getId_patient().equals(id))
                 .findFirst()
                 .orElse(null);
     }
@@ -105,7 +105,7 @@ public class PatientService{
 
             return LocalDate.of(year, month, day);
         } else {
-            throw new IllegalArgumentException("Birthdate is invalid");
+            return null;
         }
     }
 }
