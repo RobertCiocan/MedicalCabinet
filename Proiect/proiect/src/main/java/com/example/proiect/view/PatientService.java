@@ -2,68 +2,58 @@ package com.example.proiect.view;
 
 import com.example.proiect.model.Appointment;
 import com.example.proiect.model.Patient;
+import com.example.proiect.repository.AppointmentRepository;
+import com.example.proiect.repository.PatientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
-public class PatientService{
-    private final List<Patient> patients = new ArrayList<>();
-    private List<Appointment> appointments = new ArrayList<>();
-    private Long patientIdCounter = 1L;
+public class PatientService {
+    private final PatientRepository patientRepository;
+
+    @Autowired
+    public PatientService(PatientRepository patientRepository) {
+        this.patientRepository = patientRepository;
+    }
 
     public List<Patient> getAllPatients() {
-        return patients;
+        return patientRepository.findAll();
     }
 
-    public Patient getPatientById(Long id) {
-        return findPatientById(id);
+    public Optional<Patient> getPatientById(Long id) {
+        return patientRepository.findById(id);
     }
 
-    public Appointment addAppointment(Appointment appointment) {
-        appointments.add(appointment);
-        return appointment;
-    }
     public Patient createPatient(Patient patient) {
-        patient.setId_patient(patientIdCounter++);
-
-        patient.setBirth_date(getBirthDateFromCnp(patient.getCnp()));
-
-        patients.add(patient);
+        patientRepository.save(patient);
         return patient;
     }
 
     public Patient updatePatient(Long id, Patient updatedPatient) {
-        Patient existingPatient = findPatientById(id);
-        if (existingPatient != null) {
-            existingPatient.setEmail(updatedPatient.getEmail());
-            existingPatient.setPhone_nr(updatedPatient.getPhone_nr());
-            return existingPatient;
+        Optional<Patient> existingPatient = getPatientById(id);
+        if (existingPatient.isPresent()) {
+            existingPatient.get().setEmail(updatedPatient.getEmail());
+            existingPatient.get().setPhone_nr(updatedPatient.getPhone_nr());
+
+            patientRepository.save(existingPatient.get());
+
+            return existingPatient.get();
         }
         return null;
     }
 
     public boolean deletePatient(Long id) {
-        Patient patient = findPatientById(id);
-        if (patient != null) {
-            patients.remove(patient);
-            return true;
-        }
-        return false;
+        patientRepository.deleteById(id);
+        return getPatientById(id).isPresent();
     }
 
-    public Patient findPatientById(Long id) {
-        return patients.stream()
-                .filter(patient -> patient.getId_patient().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public List<Appointment> getAppointmentsByDateAndType(Long patientId, String date, String type) {
+    public Set<Appointment> getAppointmentsByDateAndType(Long id, String date, String type) {
         LocalDate localDate;
+        Optional<Patient> current_patient = patientRepository.findById(id);
+
         try {
             if ("month".equalsIgnoreCase(type)) {
                 localDate = LocalDate.now().withMonth(Integer.parseInt(date));
@@ -73,21 +63,28 @@ public class PatientService{
                 localDate = LocalDate.parse(date);
             }
         } catch (Exception e) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
 
-        return appointments.stream()
-                .filter(appointment -> appointment.getId_patient().equals(patientId) &&
-                        appointment.getDate().getMonthValue() == localDate.getMonthValue() &&
+        if(current_patient.isPresent()) {
+            Set<Appointment> result = new HashSet<>();
+            for (Appointment appointment : current_patient.get().getAppointments()) {
+                if (appointment.getDate().getMonthValue() == localDate.getMonthValue() &&
                         appointment.getDate().getYear() == localDate.getYear() &&
-                        ("day".equalsIgnoreCase(type) || appointment.getDate().getDayOfMonth() == localDate.getDayOfMonth()))
-                .collect(Collectors.toList());
+                        ("day".equalsIgnoreCase(type) || appointment.getDate().getDayOfMonth() == localDate.getDayOfMonth())) {
+                    result.add(appointment);
+                }
+            }
+            return result;
+        }
+
+        return new HashSet<>();
     }
 
-    public List<Appointment> getAppointmentsForPatient(Long patientId) {
-        return appointments.stream()
-                .filter(appointment -> appointment.getId_patient().equals(patientId))
-                .collect(Collectors.toList());
+    public Set<Appointment> getAppointmentsForPatient(Long id) {
+        if(getPatientById(id).isPresent())
+            return getPatientById(id).get().getAppointments();
+        return new HashSet<Appointment>();
     }
 
     public LocalDate getBirthDateFromCnp(String cnp){

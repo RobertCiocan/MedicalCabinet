@@ -1,62 +1,52 @@
 package com.example.proiect.model;
 
-import java.time.LocalDate;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-@Entity(name = "Patient")
-@Table(name = "patient")
+@Entity(name = "Doctor")
+@Table(name = "doctor")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Patient {
+public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_patient")
-    private Long id_patient;
+    @Column(name = "id_doctor")
+    private Long id_doctor;
 
+    @Basic
     @Column(name = "id_user")
     private Long id_user;
 
-    @Column(name = "cnp")
-    private String cnp;
-
+    @Basic
     @Column(name = "last_name")
     private String last_name;
 
+    @Basic
     @Column(name = "first_name")
     private String first_name;
 
+    @Basic
     @Column(name = "email")
     private String email;
 
+    @Basic
     @Column(name = "phone_nr")
     private String phone_nr;
 
-    @Column(name = "birth_date")
-    private LocalDate birth_date;
-
-    @Column(name = "is_active")
-    private boolean is_active;
-
-    @OneToMany(mappedBy = "patient")
-    private Set<Appointment> appointments = new HashSet<>();
+    @Basic
+    @Column(name = "specialization")
+    private String specialization;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Patient)) return false;
-        return id_patient != null && id_patient.equals(((Patient) o).getId_patient());
+        if (!(o instanceof Doctor)) return false;
+        return id_doctor != null && id_doctor.equals(((Doctor) o).getId_doctor());
     }
 
     @Override

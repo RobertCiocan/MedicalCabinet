@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/medical_office/patients")
@@ -20,7 +22,7 @@ public class PatientController {
         this.patientService = patientService;
     }
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
         Patient createdPatient = patientService.createPatient(patient);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPatient);
@@ -28,15 +30,11 @@ public class PatientController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Patient> getPatient(@PathVariable Long id) {
-        Patient patient = patientService.findPatientById(id);
-        if (patient != null) {
-            return ResponseEntity.ok(patient);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<Patient> patient = patientService.getPatientById(id);
+        return patient.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Patient>> getAllPatients() {
         List<Patient> patients = patientService.getAllPatients();
         return ResponseEntity.ok(patients);
@@ -44,8 +42,8 @@ public class PatientController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Patient> updatePatient(@PathVariable Long id, @RequestBody Patient updatedPatient) {
-        Patient patient = patientService.findPatientById(id);
-        if (patient != null) {
+        Optional<Patient> patient = patientService.getPatientById(id);
+        if (patient.isPresent()) {
             Patient updated = patientService.updatePatient(id, updatedPatient);
             return ResponseEntity.ok(updated);
         } else {
@@ -56,25 +54,15 @@ public class PatientController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
         if (patientService.deletePatient(id)) {
+            // TODO: ar trebui sa dea ceva
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PostMapping("/{id}/appointments")
-    public ResponseEntity<Appointment> createAppointmentForPatient(
-            @PathVariable Long id,
-            @RequestBody Appointment appointment) {
-        appointment.setId_patient(id);
-
-        Appointment createdAppointment = patientService.addAppointment(appointment);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
-    }
-
-    @GetMapping("/{id}")
-    public List<Appointment> getAppointmentsForPatient(
+    @GetMapping("/{id}/appointments")
+    public Set<Appointment> getAppointmentsForPatient(
             @PathVariable Long id,
             @RequestParam(required = false) String date,
             @RequestParam(required = false) String type) {

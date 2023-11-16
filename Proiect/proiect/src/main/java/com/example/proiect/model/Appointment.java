@@ -1,51 +1,60 @@
 package com.example.proiect.model;
 
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
+@Entity(name = "Appointment")
+@Table(name = "appointment")
+@Getter
+@Setter
 public class Appointment {
+
+    public Appointment() {
+    }
+
+    public Appointment(Patient patient, Doctor doctor, LocalDate date, String status) {
+        this.patient = patient;
+        this.doctor = doctor;
+        this.date = date;
+        this.status = status;
+    }
+
+    @Getter
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column ( name = "id_appointment" )
     private Long id_appointment;
-    private Long id_patient;
-    private Long id_physician;
+
+    @ManyToOne
+    @JoinColumn(name = "id_patient")
+    private Patient patient;
+
+    @ManyToOne
+    @JoinColumn(name = "id_doctor")
+    private Doctor doctor;
+
+    @Getter
+    @Basic
+    @Column ( name = "date" )
     private LocalDate date;
+    @Getter
+    @Basic
+    @Column ( name = "status" )
     private String status;
 
-    public Long getId_patient() {
-        return id_patient;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Appointment)) return false;
+        return id_appointment != null && id_appointment.equals(((Appointment) o).getId_appointment());
     }
 
-    public Long getId_appointment() {
-        return id_appointment;
-    }
-
-    public void setId_appointment(Long id_appointment) {
-        this.id_appointment = id_appointment;
-    }
-
-    public void setId_patient(Long id_patient) {
-        this.id_patient = id_patient;
-    }
-
-    public Long getId_physician() {
-        return id_physician;
-    }
-
-    public void setId_physician(Long id_physician) {
-        this.id_physician = id_physician;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

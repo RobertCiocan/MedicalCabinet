@@ -1,61 +1,59 @@
 package com.example.proiect.view;
 
 import com.example.proiect.model.Appointment;
-import com.example.proiect.model.Patient;
+import com.example.proiect.repository.AppointmentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AppointmentService {
-    private List<Appointment> appointments = new ArrayList<>();
-    private Long appointmentsIdCounter = 1L;
-    public Appointment createAppointment(Appointment appointment) {
-        appointment.setId_appointment(appointmentsIdCounter++);
+    private final AppointmentRepository appointmentRepository;
 
-        appointments.add(appointment);
-        return appointment;
+    @Autowired
+    public AppointmentService(AppointmentRepository appointmentRepository) {
+        this.appointmentRepository = appointmentRepository;
     }
 
     public List<Appointment> getAllAppointments() {
-        return appointments;
+        return appointmentRepository.findAll();
     }
 
-    public Appointment getAppointment(Long idAppointment) {
-        return appointments.stream()
-                .filter(appointment -> appointment.getId_appointment() == idAppointment)
-                .findFirst()
-                .orElse(null);
+    public Optional<Appointment> getAppointmentById(Long id) {
+        return appointmentRepository.findById(id);
     }
 
-    public Appointment getAppointmentByParams(int idPatient, int idPhysician, LocalDate date) {
-        return appointments.stream()
-                .filter(appointment -> appointment.getId_patient() == idPatient &&
-                        appointment.getId_physician() == idPhysician &&
-                        appointment.getDate() == date)
-                .findFirst()
-                .orElse(null);
+    public Appointment createAppointment(Appointment appointment) {
+        appointmentRepository.save(appointment);
+        return appointment;
     }
 
-    public Appointment updateAppointment(Long idAppointment, Appointment updatedAppointment) {
-        Appointment existingAppointment = getAppointment(idAppointment);
-        if (existingAppointment != null) {
-            existingAppointment.setDate(updatedAppointment.getDate());
-            existingAppointment.setStatus(updatedAppointment.getStatus());
-            return existingAppointment;
+    public Appointment getAppointmentByParams(Long id, int idPhysician, LocalDate date) {
+
+        //TODO
+        return null;
+    }
+
+
+    public Appointment updateAppointment(Long id, Optional<Appointment> updatedAppointment) {
+
+        Optional<Appointment> existingAppointment = getAppointmentById(id);
+        if (existingAppointment.isPresent() && updatedAppointment.isPresent()) {
+            existingAppointment.get().setDate(updatedAppointment.get().getDate());
+            existingAppointment.get().setStatus(updatedAppointment.get().getStatus());
+
+            appointmentRepository.save(existingAppointment.get());
+
+            return existingAppointment.get();
         }
         return null;
     }
 
-    public boolean deleteAppointment(Long idAppointment) {
-        Appointment appointment = getAppointment(idAppointment);
-        if (appointment != null) {
-            appointments.remove(appointment);
-            return true;
-        }
-        return false;
+    public boolean deleteAppointment(Long id) {
+        appointmentRepository.deleteById(id);
+        return getAppointmentById(id).isPresent();
     }
 }
 
