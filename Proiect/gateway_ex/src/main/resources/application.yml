@@ -1,0 +1,40 @@
+medical:
+  api:
+    3_services:
+      id: 3_services_routing
+      path: /3_services/**
+      uri: ${3_SERVICES_SERVICE_URL:http://localhost:8086}
+
+spring:
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      routes:
+        - id: ${medical.api.3_services.id}
+          uri: ${medical.api.3_services.uri}
+          predicates:
+            - Path=${medical.api.3_services.path}
+      default-filters:
+        - StripPrefix=1
+        - AddRequestHeader=proxied, true
+        - OncePerRequestFilter
+      filter:
+        remove-hop-by-hop:
+          headers: connection, keep-alive, x-frame-options
+      httpclient:
+        connect-timeout: 30000 # 30s
+        pool:
+          max-connections: 2000
+          type: FIXED
+          metrics: true
+
+
+logging:
+  level:
+    com.gastrosfera: INFO
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.ipc.netty: DEBUG
+    reactor.netty: DEBUG

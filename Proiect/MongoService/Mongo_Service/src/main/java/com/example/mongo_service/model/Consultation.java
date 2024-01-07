@@ -2,6 +2,7 @@ package com.example.mongo_service.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -12,10 +13,11 @@ import java.util.List;
 @Data
 @Document
 public class Consultation {
-    @Id
-    private Long id_consultation;
+    @Indexed
     private Long id_patient;
+    @Indexed
     private Long id_doctor;
+    @Indexed
     private LocalDateTime date;
     private Diagnostic diagnostic;
     private List<Investigation> investigation;

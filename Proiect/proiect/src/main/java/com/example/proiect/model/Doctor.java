@@ -1,10 +1,18 @@
 package com.example.proiect.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.checkerframework.common.aliasing.qual.Unique;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity(name = "Doctor")
 @Table(name = "doctor")
@@ -31,7 +39,8 @@ public class Doctor {
     private String first_name;
 
     @Basic
-    @Column(name = "email")
+    @Unique
+    @Column(name = "email", unique = true)
     private String email;
 
     @Basic
@@ -41,6 +50,9 @@ public class Doctor {
     @Basic
     @Column(name = "specialization")
     private String specialization;
+
+    @OneToMany(mappedBy = "doctor")
+    private Set<Appointment> appointments = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

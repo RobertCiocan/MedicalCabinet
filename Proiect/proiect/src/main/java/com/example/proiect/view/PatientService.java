@@ -1,9 +1,12 @@
 package com.example.proiect.view;
 
 import com.example.proiect.model.Appointment;
+import com.example.proiect.model.Doctor;
 import com.example.proiect.model.Patient;
 import com.example.proiect.repository.AppointmentRepository;
 import com.example.proiect.repository.PatientRepository;
+import com.example.proiect.utils.BeanUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,12 +38,12 @@ public class PatientService {
     public Patient updatePatient(Long id, Patient updatedPatient) {
         Optional<Patient> existingPatient = getPatientById(id);
         if (existingPatient.isPresent()) {
-            existingPatient.get().setEmail(updatedPatient.getEmail());
-            existingPatient.get().setPhone_nr(updatedPatient.getPhone_nr());
+            Patient patientToUpdate = existingPatient.get();
+            BeanUtils.copyProperties(updatedPatient, patientToUpdate, BeanUtil.getNullPropertyNames(updatedPatient));
 
-            patientRepository.save(existingPatient.get());
+            patientRepository.save(patientToUpdate);
 
-            return existingPatient.get();
+            return patientToUpdate;
         }
         return null;
     }

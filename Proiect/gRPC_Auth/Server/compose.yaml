@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  idm_mariadb:
+    image: 'mariadb:latest'
+    container_name: 'idm_mariadb'
+    environment:
+      - 'MARIADB_USER=admin'
+      - 'MARIADB_PASSWORD=parola'
+      - 'MARIADB_ROOT_PASSWORD=secret'
+      - 'MARIADB_DATABASE=idm_db'
+    ports:
+      - '3307:3306'
+
+  redis:
+    image: 'redis:latest'
+    container_name: 'idm_redis'
+    ports:
+      - "6379:6379"

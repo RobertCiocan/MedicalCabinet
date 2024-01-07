@@ -1,6 +1,8 @@
 package com.example.proiect.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,16 +37,28 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "id_doctor")
+    @JsonIgnore
     private Doctor doctor;
 
     @Getter
     @Basic
     @Column ( name = "date" )
     private LocalDate date;
+
     @Getter
     @Basic
     @Column ( name = "status" )
     private String status;
+
+    @JsonBackReference
+    public Patient getPatient() {
+        return patient;
+    }
+
+    @JsonBackReference
+    public Doctor getDoctor() {
+        return doctor;
+    }
 
     @Override
     public boolean equals(Object o) {
