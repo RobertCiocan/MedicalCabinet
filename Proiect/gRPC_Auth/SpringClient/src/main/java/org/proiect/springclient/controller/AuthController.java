@@ -68,8 +68,6 @@ public class AuthController {
                 return createErrorResponse(HttpStatus.BAD_REQUEST, "Token must not be empty", "TOKEN_EMPTY");
             }
 
-            // Your validation logic
-
             AuthServiceOuterClass.ValidateResponse response = AuthServiceOuterClass.ValidateResponse.newBuilder()
                     .setIsValid(true)
                     .build();
@@ -91,13 +89,8 @@ public class AuthController {
                 return createErrorResponse(HttpStatus.BAD_REQUEST, "Username, password, and role must not be empty", "INVALID_INPUT");
             }
 
-            // Your registration logic
 
-            AuthServiceOuterClass.RegisterResponse response = AuthServiceOuterClass.RegisterResponse.newBuilder()
-                    .setUsername("exampleUsername")
-                    .setUid("exampleUid")
-                    .setRole("exampleRole")
-                    .build();
+
 
             Link selfLink = WebMvcLinkBuilder.linkTo(getClass()).slash("register").withSelfRel();
             Link parentLink = WebMvcLinkBuilder.linkTo(getClass()).withRel("parent");
@@ -116,7 +109,6 @@ public class AuthController {
                 return createErrorResponse(HttpStatus.BAD_REQUEST, "Token must not be empty", "TOKEN_EMPTY");
             }
 
-            // Your setBlacklist logic
 
             AuthServiceOuterClass.BlacklisResponse response = AuthServiceOuterClass.BlacklisResponse.newBuilder()
                     .setSuccess(true)
@@ -139,7 +131,6 @@ public class AuthController {
                 return createErrorResponse(HttpStatus.BAD_REQUEST, "Username, old password, and new password must not be empty", "INVALID_INPUT");
             }
 
-            // Your updatePassword logic
 
             AuthServiceOuterClass.UpdatePasswordResponse response = AuthServiceOuterClass.UpdatePasswordResponse.newBuilder()
                     .setSuccess(true)
