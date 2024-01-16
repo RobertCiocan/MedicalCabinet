@@ -65,19 +65,31 @@ public class AppointmentController {
         }
     }
 
-    @GetMapping("/{idPatient}/{idPhysician}/{date}")
-    public ResponseEntity<EntityModel<Appointment>> getAppointmentByParam(
-            @PathVariable Long idPatient,
-            @PathVariable int idPhysician,
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    @GetMapping("")
+    public ResponseEntity<List<EntityModel<Appointment>>> getAppointmentByParam(
+            @RequestParam(required = false) Long idPatient,
+            @RequestParam(required = false) Long idDoctor,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        Appointment appointment = appointmentService.getAppointmentByParams(idPatient, idPhysician, date);
-        if (appointment != null) {
-            Link selfLink = linkTo(methodOn(AppointmentController.class).getAppointment(appointment.getId_appointment())).withSelfRel();
-            EntityModel<Appointment> resource = EntityModel.of(appointment, selfLink);
-            return ResponseEntity.ok(resource);
-        } else {
-            return ResponseEntity.notFound().build();
+        try {
+            List<Appointment> appointments = appointmentService.getAppointmentsByParams(idPatient, idDoctor, date);
+            if (appointments != null) {
+                List<EntityModel<Appointment>> resources = appointments.stream()
+                        .map(a -> EntityModel.of(a, linkTo(methodOn(AppointmentController.class).getAppointment(a.getId_appointment())).withSelfRel()))
+                        .toList();
+
+                if (resources.isEmpty()) {
+                    return ResponseEntity.notFound().build();
+                }
+
+                return ResponseEntity.ok().body(resources);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
         }
     }
 
@@ -96,7 +108,7 @@ public class AppointmentController {
         if (appointment != null) {
             Link selfLink = linkTo(methodOn(AppointmentController.class).updateAppointment(idAppointment)).withSelfRel();
             Link getLink = linkTo(methodOn(AppointmentController.class).getAppointment(idAppointment)).withRel("getAppointment").withType("GET");
-            EntityModel<Appointment> resource = EntityModel.of(appointment, selfLink);
+            EntityModel<Appointment> resource = EntityModel.of(appointment, selfLink, getLink);
             return ResponseEntity.ok(resource);
         } else {
             return ResponseEntity.notFound().build();

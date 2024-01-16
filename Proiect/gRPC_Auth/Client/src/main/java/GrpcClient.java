@@ -23,8 +23,10 @@ public class GrpcClient {
                 .setPassword("parola")
                 .build());
 //
+        String token = authResponse.getToken();
+
         AuthServiceOuterClass.ValidateResponse validateResponse = stub.validate(AuthServiceOuterClass.ValidateRequest.newBuilder()
-                        .setToken(authResponse.getToken())
+                        .setToken(token)
                         .build());
         System.out.println(authResponse.getToken());
         System.out.println(validateResponse.getIsValid());

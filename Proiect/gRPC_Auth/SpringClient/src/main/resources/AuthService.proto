@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+option java_package = "org.proiect.springclient.proto";
+
+service AuthService{
+  rpc Auth (AuthRequest) returns (AuthResponse) {}
+  rpc Logout (LogoutRequest) returns (LogoutResponse) {}
+  rpc Validate (ValidateRequest) returns (ValidateResponse) {}
+  rpc Register (RegisterRequest) returns (RegisterResponse) {}
+  rpc SetBlacklist (BlacklistRequest) returns (BlacklisResponse) {}
+  rpc UpdatePassword (UpdatePasswordRequest) returns (UpdatePasswordResponse) {}
+}
+
+message AuthRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  string token = 1;
+  string error_message = 2;
+}
+
+// logout
+message LogoutRequest {
+  string token = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
+}
+
+// validate token
+message ValidateRequest {
+  string token = 1;
+}
+
+message ValidateResponse {
+  bool is_valid = 1;
+}
+
+// insert in db
+message RegisterRequest {
+  string username = 1;
+  string password = 2;
+  string role = 3;
+}
+
+message RegisterResponse {
+  // returnam userul
+  string username = 1;
+  string role = 2;
+  int64 uid = 3;
+}
+
+// update password
+message UpdatePasswordRequest {
+  string username = 1;
+  string OldPassword = 2;
+  string NewPassword = 3;
+}
+
+message UpdatePasswordResponse {
+  bool success = 1;
+}
+
+// set blacklist
+message BlacklistRequest {
+  string token = 1;
+}
+
+message BlacklisResponse {
+  bool success = 1;
+}

@@ -39,7 +39,7 @@ public class AuthImpl extends AuthServiceGrpc.AuthServiceImplBase {
                     user.getIdUser(),
                     user.getRole(),
                     user.getUsername(),
-                    28800L
+                    2880000L
             );
 
             AuthServiceOuterClass.AuthResponse response = AuthServiceOuterClass.AuthResponse.newBuilder()
@@ -84,8 +84,7 @@ public class AuthImpl extends AuthServiceGrpc.AuthServiceImplBase {
             return;
         }
 
-        String jwt = request.getToken();
-        System.out.println(jwt);
+        String jwt = request.getToken().substring(7);
 
         if (!JwtUtil.validateJwt(jwt)) {
             responseObserver.onError(Status.UNAUTHENTICATED.withDescription("Invalid token").asRuntimeException());
@@ -159,7 +158,6 @@ public class AuthImpl extends AuthServiceGrpc.AuthServiceImplBase {
             e.printStackTrace();
             responseObserver.onError(Status.INTERNAL.withDescription("Internal Server Error").asRuntimeException());
         }
-
     }
 
     @Override

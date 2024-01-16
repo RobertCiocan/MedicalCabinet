@@ -1,0 +1,47 @@
+server:
+    port: 8080
+
+spring:
+  main:
+    web-application-type: reactive
+  cloud:
+      gateway:
+          routes:
+              - id: mysql_service
+                uri: http://localhost:8082
+                predicates:
+                    - Path=/service1/**
+              - id: mongo_service
+                uri: http://localhost:8083
+                predicates:
+                    - Path=/service2/**
+              - id: idm_service
+                uri: http://localhost:8084
+                predicates:
+                    - Path=/service3/**
+                filters:
+                    - name : JwtValidationFilter
+                      args:
+                        excludePath: /service3/login
+
+          default-filters:
+            - StripPrefix=1
+            - AddRequestHeader=proxied, true
+            - OncePerRequestFilter
+            - JwtValidationFilter
+            - LoginFilter
+          filter:
+            remove-hop-by-hop:
+              headers: connection, keep-alive, x-frame-options
+          httpclient:
+            connect-timeout: 30000
+            pool:
+              max-connections: 2000
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.ipc.netty: DEBUG
+    reactor.netty: DEBUG

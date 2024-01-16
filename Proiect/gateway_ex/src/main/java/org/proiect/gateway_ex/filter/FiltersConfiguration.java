@@ -15,9 +15,4 @@ public class FiltersConfiguration {
         return new OncePerRequestFilter();
     }
 
-    @Bean
-    public JwtValidationFilter jwtValidationFilter() {
-        return new JwtValidationFilter();
-    }
-
 }

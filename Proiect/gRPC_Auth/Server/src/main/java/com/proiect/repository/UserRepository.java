@@ -1,7 +1,6 @@
 package com.proiect.repository;
 
 import com.proiect.model.User;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;

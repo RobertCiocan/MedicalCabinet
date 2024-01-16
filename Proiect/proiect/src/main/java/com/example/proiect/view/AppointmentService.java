@@ -30,9 +30,17 @@ public class AppointmentService {
         return appointment;
     }
 
-    public Appointment getAppointmentByParams(Long id, int idPhysician, LocalDate date) {
+    public List<Appointment> getAppointmentsByParams(Long patientId, Long doctorId, LocalDate date) {
+        if (patientId != null) {
+            return appointmentRepository.findByPatientId(patientId).orElse(null);
+        } else if (doctorId != null && date != null) {
+            return appointmentRepository.findByDoctorIdAndDate(doctorId, date).orElse(null);
+        } else if (doctorId != null) {
+            return appointmentRepository.findByDoctorId(doctorId).orElse(null);
+        } else if (date != null) {
+            return appointmentRepository.findByDate(date).orElse(null);
+        }
 
-        //TODO
         return null;
     }
 
