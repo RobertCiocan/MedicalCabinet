@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,25 +31,34 @@ public class Patient {
     private Long id_user;
 
     @Column(name = "cnp")
+    @Size(min = 13, max = 13, message = "CNP must have 13 digits")
+    @Pattern(regexp = "\\d+", message = "CNP must contain only digits")
     private String cnp;
 
     @Column(name = "last_name")
+    @NotBlank(message = "Last name must not be blank")
     private String last_name;
 
     @Column(name = "first_name")
+    @NotBlank(message = "First name must not be blank")
     private String first_name;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
+    @Email(message = "Invalid email format")
     private String email;
 
     @Column(name = "phone_nr")
+//    @Size(min = 10, max = 10, message = "Phone number must have 10 digits")
+//    @Pattern(regexp = "\\d+", message = "Phone number must contain only digits")
     private String phone_nr;
 
     @Column(name = "birth_date")
     private LocalDate birth_date;
 
     @Column(name = "is_active")
-    private boolean is_active;
+    @NotNull(message = "is_Active must not be null")
+    @Pattern(regexp = "true|false", message = "is_Active must be true or false")
+    private String is_Active;
 
     @OneToMany(mappedBy = "patient")
     private Set<Appointment> appointments = new HashSet<>();

@@ -62,6 +62,7 @@ public class PatientController {
         }
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Patient>> getPatient(@PathVariable Long id) {
         try{
