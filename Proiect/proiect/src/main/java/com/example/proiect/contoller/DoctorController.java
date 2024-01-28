@@ -42,9 +42,10 @@ public class DoctorController {
 
         try {
             Doctor createdDoctor = doctorService.createDoctor(doctor);
+            Link parentLink = linkTo(DoctorController.class).withRel("parent");
             Link selfLink = linkTo(methodOn(DoctorController.class).createDoctor(createdDoctor, null)).withSelfRel();
             Link getLink = linkTo(methodOn(DoctorController.class).getDoctor(createdDoctor.getId_doctor())).withRel("getDoctor").withType("GET");
-            EntityModel<Doctor> resource = EntityModel.of(createdDoctor, selfLink, getLink);
+            EntityModel<Doctor> resource = EntityModel.of(createdDoctor, selfLink, getLink, parentLink);
             return ResponseEntity.status(HttpStatus.CREATED).body(resource); // 201 Created
         } catch (DuplicateKeyException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(createErrorMessage("Email already exists."));
@@ -61,12 +62,13 @@ public class DoctorController {
             Optional<Doctor> doctor = doctorService.getDoctorById(id);
 
             return doctor.map(d -> {
+                Link parentLink = linkTo(DoctorController.class).withRel("parent");
                 Link selfLink = linkTo(methodOn(DoctorController.class).getDoctor(id)).withSelfRel();
                 Link updateLink = linkTo(methodOn(DoctorController.class).updateDoctor(id, null, null)).withRel("updateDoctor").withType("PUT");
                 Link deleteLink = linkTo(methodOn(DoctorController.class).deleteDoctor(id)).withRel("deleteDoctor").withType("DELETE");
                 Link searchLink = linkTo(methodOn(DoctorController.class).getBy(null, null)).withRel("searchDoctors").withType("GET");
 
-                EntityModel<Doctor> resource = EntityModel.of(d, selfLink, updateLink, deleteLink, searchLink);
+                EntityModel<Doctor> resource = EntityModel.of(d, parentLink, selfLink, updateLink, deleteLink, searchLink);
                 return ResponseEntity.ok(resource);
             }).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {
@@ -98,9 +100,10 @@ public class DoctorController {
 
         Doctor doctor = doctorService.updateDoctor(id, updatedDoctor);
         if (doctor != null) {
+            Link parentLink = linkTo(DoctorController.class).withRel("parent");
             Link selfLink = linkTo(methodOn(DoctorController.class).updateDoctor(id, doctor, null)).withSelfRel();
             Link getLink = linkTo(methodOn(DoctorController.class).getDoctor(doctor.getId_doctor())).withRel("getDoctor").withType("GET");
-            EntityModel<Doctor> resource = EntityModel.of(doctor, selfLink, getLink);
+            EntityModel<Doctor> resource = EntityModel.of(doctor, parentLink, selfLink, getLink);
             return ResponseEntity.ok(resource);
         } else {
             return ResponseEntity.notFound().build();
@@ -111,9 +114,10 @@ public class DoctorController {
     public ResponseEntity<EntityModel<String>> deleteDoctor(@PathVariable Long id) {
         boolean deleted = doctorService.deleteDoctor(id);
         if (deleted) {
+            Link parentLink = linkTo(DoctorController.class).withRel("parent");
             Link selfLink = linkTo(methodOn(DoctorController.class).deleteDoctor(id)).withSelfRel();
             Link getLink = linkTo(methodOn(DoctorController.class).getDoctor(id)).withRel("getDoctor").withType("GET");
-            EntityModel<String> resource = EntityModel.of("Doctor deleted successfully.", selfLink, getLink);
+            EntityModel<String> resource = EntityModel.of("Doctor deleted successfully.", parentLink, selfLink, getLink);
             return ResponseEntity.ok(resource);
         } else {
             return ResponseEntity.notFound().build();
@@ -132,6 +136,7 @@ public class DoctorController {
 
             List<EntityModel<Appointment>> appointmentResources = appointments.stream()
                     .map(appointment -> EntityModel.of(appointment,
+                            linkTo(DoctorController.class).withRel("parent"),
                             linkTo(methodOn(PatientController.class).getAppointmentsForPatient(null, null, null)).withSelfRel(),
                             linkTo(methodOn(AppointmentController.class).getAppointment(appointment.getId_appointment())).withRel("getAppointment").withType("GET")))
                     .collect(Collectors.toList());
@@ -165,6 +170,7 @@ public class DoctorController {
 
             List<EntityModel<Doctor>> doctorResources = searchResults.stream()
                 .map(doctor -> EntityModel.of(doctor,
+                        linkTo(DoctorController.class).withRel("parent"),
                         linkTo(methodOn(DoctorController.class).getBy(null, null)).withSelfRel(),
                         linkTo(methodOn(DoctorController.class).getDoctor(doctor.getId_doctor())).withRel("getDoctor").withType("GET"),
                         linkTo(methodOn(DoctorController.class).updateDoctor(doctor.getId_doctor(), null, null)).withRel("updateDoctor").withType("PUT"),
@@ -192,6 +198,7 @@ public class DoctorController {
 
             List<EntityModel<Doctor>> paginatedDoctorResources = paginatedDoctors.stream()
                     .map(doctor -> EntityModel.of(doctor,
+                            linkTo(DoctorController.class).withRel("parent"),
                             linkTo(methodOn(DoctorController.class).getPaginatedDoctors(page, itemsPerPage)).withSelfRel(),
                             linkTo(methodOn(DoctorController.class).getDoctor(doctor.getId_doctor())).withRel("getDoctor").withType("GET"),
                             linkTo(methodOn(DoctorController.class).updateDoctor(doctor.getId_doctor(), null, null)).withRel("updateDoctor").withType("PUT"),

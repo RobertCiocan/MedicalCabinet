@@ -61,10 +61,11 @@ public class AppointmentController {
 
             Appointment createdAppointment = appointmentService.createAppointment(appointment);
 
+            Link parentLink = linkTo(AppointmentController.class).withRel("parent");
             Link selfLink = linkTo(methodOn(AppointmentController.class).createAppointment(appointment, null)).withSelfRel();
             Link getLink = linkTo(methodOn(AppointmentController.class).getAppointment(createdAppointment.getId_appointment())).withRel("getAppointment").withType("GET");
 
-            EntityModel<Appointment> resource = EntityModel.of(createdAppointment, selfLink, getLink);
+            EntityModel<Appointment> resource = EntityModel.of(createdAppointment, parentLink, selfLink, getLink);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(resource);
         } catch (Exception e) {
@@ -79,8 +80,9 @@ public class AppointmentController {
             Optional<Appointment> appointment = appointmentService.getAppointmentById(id);
 
             return appointment.map(a -> {
+                Link parentLink = linkTo(AppointmentController.class).withRel("parent");
                 Link selfLink = linkTo(methodOn(AppointmentController.class).getAppointment(id)).withSelfRel();
-                EntityModel<Appointment> resource = EntityModel.of(a, selfLink);
+                EntityModel<Appointment> resource = EntityModel.of(a, parentLink, selfLink);
                 return ResponseEntity.ok(resource);
             }).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {
@@ -134,9 +136,10 @@ public class AppointmentController {
         }
         Appointment appointment = appointmentService.updateAppointment(idAppointment, updatedAppointment);
         if (appointment != null) {
+            Link parentLink = linkTo(AppointmentController.class).withRel("parent");
             Link selfLink = linkTo(methodOn(AppointmentController.class).updateAppointment(idAppointment, updatedAppointment, null)).withSelfRel();
             Link getLink = linkTo(methodOn(AppointmentController.class).getAppointment(idAppointment)).withRel("getAppointment").withType("GET");
-            EntityModel<Appointment> resource = EntityModel.of(appointment, selfLink, getLink);
+            EntityModel<Appointment> resource = EntityModel.of(appointment, parentLink, selfLink, getLink);
             return ResponseEntity.ok(resource);
         } else {
             return ResponseEntity.notFound().build();

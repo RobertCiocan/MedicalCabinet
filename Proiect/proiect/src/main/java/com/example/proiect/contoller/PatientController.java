@@ -46,9 +46,12 @@ public class PatientController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(createErrorMessage("Patient with the same CNP already exists."));
             }
             Patient createdPatient = patientService.createPatient(patient);
+
+            Link parentLink = linkTo(PatientController.class).withRel("parent");
             Link selfLink = linkTo(methodOn(PatientController.class).createPatient(createdPatient, null)).withSelfRel();
             Link getLink = linkTo(methodOn(PatientController.class).getPatient(createdPatient.getId_patient())).withRel("getPatient").withType("GET");
-            EntityModel<Patient> resource = EntityModel.of(createdPatient, selfLink, getLink);
+
+            EntityModel<Patient> resource = EntityModel.of(createdPatient, parentLink, selfLink, getLink);
             return ResponseEntity.status(HttpStatus.CREATED).body(resource);
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(createErrorMessage("Data integrity violation."));
@@ -65,12 +68,13 @@ public class PatientController {
             Optional<Patient> patient = patientService.getPatientById(id);
 
             return patient.map(p -> {
+                Link parentLink = linkTo(PatientController.class).withRel("parent");
                 Link selfLink = linkTo(methodOn(PatientController.class).getPatient(id)).withSelfRel();
                 Link updateLink = linkTo(methodOn(PatientController.class).updatePatient(id, null)).withRel("updatePatient").withType("PUT");
                 Link deleteLink = linkTo(methodOn(PatientController.class).deletePatient(id)).withRel("deletePatient").withType("DELETE");
                 Link searchLink = linkTo(methodOn(PatientController.class).getAppointmentsForPatient(id, null, null)).withRel("getAppointmentsForPatient").withType("GET");
 
-                EntityModel<Patient> resource = EntityModel.of(p, selfLink, updateLink, deleteLink, searchLink);
+                EntityModel<Patient> resource = EntityModel.of(p, parentLink, selfLink, updateLink, deleteLink, searchLink);
                 return ResponseEntity.ok(resource);
             }).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {
@@ -92,6 +96,7 @@ public class PatientController {
 
             List<EntityModel<Patient>> patientResources = patients.stream()
                     .map(p -> EntityModel.of(p,
+                            linkTo(PatientController.class).withRel("parent"),
                             linkTo(methodOn(PatientController.class).getAllPatients()).withSelfRel(),
                             linkTo(methodOn(PatientController.class).updatePatient(p.getId_patient(), null)).withRel("updatePatient").withType("PUT"),
                             linkTo(methodOn(PatientController.class).deletePatient(p.getId_patient())).withRel("deletePatient").withType("DELETE"),
@@ -117,6 +122,7 @@ public class PatientController {
 
             List<EntityModel<Appointment>> appointmentResources = appointments.stream()
                     .map(appointment -> EntityModel.of(appointment,
+                            linkTo(PatientController.class).withRel("parent"),
                             linkTo(methodOn(PatientController.class).getAppointmentsForPatient(null, null, null)).withSelfRel(),
                             linkTo(methodOn(AppointmentController.class).getAppointment(appointment.getId_appointment())).withRel("getAppointment").withType("GET")))
                     .collect(Collectors.toList());
@@ -168,8 +174,9 @@ public class PatientController {
         Optional<Patient> patient = patientService.getPatientById(id);
         if (patient.isPresent()) {
             Patient updated = patientService.updatePatient(id, updatedPatient);
+            Link parentLink = linkTo(PatientController.class).withRel("parent");
             Link selfLink = linkTo(methodOn(PatientController.class).updatePatient(id, updated)).withSelfRel();
-            EntityModel<Patient> resource = EntityModel.of(updated, selfLink);
+            EntityModel<Patient> resource = EntityModel.of(updated, parentLink, selfLink);
             return ResponseEntity.ok(resource);
         } else {
             return ResponseEntity.notFound().build();
@@ -179,9 +186,10 @@ public class PatientController {
     @DeleteMapping("/{id}")
     public ResponseEntity<EntityModel<String>> deletePatient(@PathVariable Long id) {
         if (patientService.deletePatient(id)) {
+            Link parentLink = linkTo(PatientController.class).withRel("parent");
             Link selfLink = linkTo(methodOn(PatientController.class).deletePatient(id)).withSelfRel();
             Link getLink = linkTo(methodOn(PatientController.class).getPatient(id)).withRel("getPatient").withType("GET");
-            EntityModel<String> resource = EntityModel.of("Patient deleted successfully.", selfLink, getLink);
+            EntityModel<String> resource = EntityModel.of("Patient deleted successfully.", parentLink, selfLink, getLink);
             return ResponseEntity.ok(resource);
         } else {
             return ResponseEntity.notFound().build();
@@ -202,6 +210,7 @@ public class PatientController {
 
             List<EntityModel<Appointment>> appointmentResources = appointments.stream()
                     .map(appointment -> EntityModel.of(appointment,
+                            linkTo(PatientController.class).withRel("parent"),
                             linkTo(methodOn(PatientController.class).getAppointmentsForPatient(null, null, null)).withSelfRel(),
                             linkTo(methodOn(AppointmentController.class).getAppointment(appointment.getId_appointment())).withRel("getAppointment").withType("GET")))
                     .collect(Collectors.toList());

@@ -39,10 +39,11 @@ public class ConsultationController {
             System.out.println(consultation);
             Consultation createdConsultation = consultationService.createConsultation(consultation);
 
+            Link parentLink = linkTo(Consultation.class).withRel("parent");
             Link selfLink = linkTo(methodOn(ConsultationController.class).createConsultation(createdConsultation, null)).withSelfRel();
             Link getLink = linkTo(methodOn(ConsultationController.class).getConsultation(null)).withRel("getConsultation").withType("GET");
 
-            EntityModel<Consultation> resource = EntityModel.of(createdConsultation, selfLink, getLink);
+            EntityModel<Consultation> resource = EntityModel.of(createdConsultation, parentLink, selfLink, getLink);
             return ResponseEntity.status(HttpStatus.CREATED).body(resource);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createErrorMessage("Bad Request", null)); // 400 Bad Request
@@ -57,11 +58,12 @@ public class ConsultationController {
             Optional<Consultation> consultation = consultationService.getConsultationById(id);
 
             return consultation.map(c -> {
+                Link parentLink = linkTo(Consultation.class).withRel("parent");
                 Link selfLink = linkTo(methodOn(ConsultationController.class).getConsultation(id)).withSelfRel();
                 Link updateLink = linkTo(methodOn(ConsultationController.class).updateConsultation(id, null, null)).withRel("updateConsultation").withType("PUT");
                 Link deleteLink = linkTo(methodOn(ConsultationController.class).deleteConsultation(id)).withRel("deleteConsultation").withType("DELETE");
 
-                EntityModel<Consultation> resource = EntityModel.of(c, selfLink, updateLink, deleteLink);
+                EntityModel<Consultation> resource = EntityModel.of(c, parentLink, selfLink, updateLink, deleteLink);
                 return ResponseEntity.ok(resource);
             }).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {
@@ -92,8 +94,10 @@ public class ConsultationController {
                 return ResponseEntity.noContent().build();
             }
 
+
             List<EntityModel<Consultation>> consultationResources = consultations.stream()
                     .map(consultation -> EntityModel.of(consultation,
+                            linkTo(Consultation.class).withRel("parent"),
                             linkTo(methodOn(ConsultationController.class).getConsultation(consultation.getId())).withSelfRel(),
                             linkTo(methodOn(ConsultationController.class).updateConsultation(consultation.getId(), null, null)).withRel("updateConsultation").withType("PUT"),
                             linkTo(methodOn(ConsultationController.class).deleteConsultation(consultation.getId())).withRel("deleteConsultation").withType("DELETE")))
@@ -119,9 +123,10 @@ public class ConsultationController {
         }
         Consultation consultation = consultationService.updateConsultation(id, updatedConsultation);
         if (consultation != null) {
+            Link parentLink = linkTo(Consultation.class).withRel("parent");
             Link selfLink = linkTo(methodOn(ConsultationController.class).updateConsultation(id, consultation, null)).withSelfRel();
             Link getLink = linkTo(methodOn(ConsultationController.class).getConsultation(null)).withRel("getConsultation").withType("GET");
-            EntityModel<Consultation> resource = EntityModel.of(consultation, selfLink, getLink);
+            EntityModel<Consultation> resource = EntityModel.of(consultation, parentLink, selfLink, getLink);
             return ResponseEntity.ok(resource);
         } else {
             return ResponseEntity.notFound().build();
@@ -134,10 +139,11 @@ public class ConsultationController {
             Consultation updatedConsultation = consultationService.addInvestigationToConsultation(id, newInvestigation);
 
             if (updatedConsultation != null) {
+                Link parentLink = linkTo(Consultation.class).withRel("parent");
                 Link selfLink = linkTo(methodOn(ConsultationController.class).getConsultation(id)).withSelfRel();
                 Link getLink = linkTo(methodOn(ConsultationController.class).getConsultation(null)).withRel("getConsultation").withType("GET");
 
-                EntityModel<Consultation> resource = EntityModel.of(updatedConsultation, selfLink, getLink);
+                EntityModel<Consultation> resource = EntityModel.of(updatedConsultation, parentLink, selfLink, getLink);
                 return ResponseEntity.ok(resource);
             } else {
                 return ResponseEntity.notFound().build();
@@ -153,8 +159,9 @@ public class ConsultationController {
     public ResponseEntity<EntityModel<String>> deleteConsultation(@PathVariable String id) {
         boolean deleted = consultationService.deleteConsultation(id);
         if (deleted) {
+            Link parentLink = linkTo(Consultation.class).withRel("parent");
             Link selfLink = linkTo(methodOn(ConsultationController.class).deleteConsultation(id)).withSelfRel();
-            EntityModel<String> resource = EntityModel.of("Consultation deleted successfully.", selfLink);
+            EntityModel<String> resource = EntityModel.of("Consultation deleted successfully.", parentLink, selfLink);
             return ResponseEntity.ok(resource);
         } else {
             return ResponseEntity.notFound().build();
@@ -200,6 +207,7 @@ public class ConsultationController {
 
                 List<EntityModel<Investigation>> investigationResources = investigations.stream()
                         .map(investigation -> EntityModel.of(investigation,
+                                linkTo(Consultation.class).withRel("parent"),
                                 linkTo(methodOn(ConsultationController.class).getInvestigationsForConsultation(investigation.getName())).withSelfRel()
                         ))
                         .toList();
