@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { PatientService } from '../patient.service';
 import { Router } from '@angular/router';
 import { Appointment } from '../models/appointment.model';
 import { DoctorService } from '../doctor.service';
 import { Doctor } from '../models/doctor.model';
 import { AppointmentService } from '../appointment.service';
-import { map, switchMap } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -17,13 +18,15 @@ export class PatientPageComponent implements OnInit {
   appointments: Appointment[] = [];
   doctors: Doctor[] = [];
   newAppointmentDate: string = '';
-  selectedDoctorId: string = '';
+  selectedDoctorId: number = 0;
 
   constructor(
     private patientService: PatientService, 
     private doctorService: DoctorService, 
     private appointmentService: AppointmentService, 
-    private router: Router
+    private router: Router,
+    private datePipe: DatePipe,
+    private snackBar: MatSnackBar
     ) {}
 
   ngOnInit(): void {
@@ -65,16 +68,19 @@ export class PatientPageComponent implements OnInit {
     this.patientService.getPatientIdFromUserId(payload.jti).subscribe(
       response => {
         if (this.selectedDoctorId && this.newAppointmentDate) {
+          const formattedDate = this.datePipe.transform(this.newAppointmentDate, 'dd:MM:yyyy HH:mm') || '';
           const newAppointment: Appointment = {
             id_appointment: 0,
-            date: new Date(this.newAppointmentDate),
+            date: formattedDate,
             status: 'scheduled',
             doctor: {
-              id_doctor: this.selectedDoctorId
+              id_doctor: ""
             },
+            id_doc : this.selectedDoctorId,
             patient: {
               id_patient: response.uid
-            }
+            },
+            id_pat: response.uid
           };
 
           console.log('New appointment:', newAppointment);
@@ -85,7 +91,8 @@ export class PatientPageComponent implements OnInit {
               this.loadAppointments();
             },
             (error) => {
-              console.error('Error creating appointment', error);
+              console.error(error?.error?.message);
+              this.showErrorSnackBar(error?.error?.message || 'An unexpected error occurred');
             }
           );
         } else {
@@ -93,7 +100,8 @@ export class PatientPageComponent implements OnInit {
         }
       },
       error => {
-        console.error('Error creating appointment', error);
+        console.error(error?.error?.message);
+        this.showErrorSnackBar(error?.error?.message || 'An unexpected error occurred');
       }
     );
   }
@@ -110,7 +118,14 @@ export class PatientPageComponent implements OnInit {
     );
   }
 
-  selectDoctor(doctorId: string) {
+  selectDoctor(doctorId: number) {
     this.selectedDoctorId = doctorId;
+  }
+
+  private showErrorSnackBar(message: string) {
+    this.snackBar.open(message, 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar']
+    });
   }
 }

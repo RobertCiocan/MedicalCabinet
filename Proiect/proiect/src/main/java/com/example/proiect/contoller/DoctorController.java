@@ -5,6 +5,7 @@ import com.example.proiect.model.Patient;
 import com.example.proiect.utils.CustomException;
 import com.example.proiect.view.DoctorService;
 import com.example.proiect.model.Doctor;
+import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
@@ -12,12 +13,15 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.proiect.utils.ValidationUtil.createErrorMessage;
+import static com.example.proiect.utils.ValidationUtil.getValidationErrors;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
@@ -30,20 +34,24 @@ public class DoctorController {
     }
 
     @PostMapping("")
-    public ResponseEntity<EntityModel<Doctor>> createDoctor(@RequestBody Doctor doctor) {
-        System.out.println("DoctorController.createDoctor");
+    public ResponseEntity<?> createDoctor(@Valid @RequestBody Doctor doctor, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(getValidationErrors(bindingResult));
+        }
+
         try {
             Doctor createdDoctor = doctorService.createDoctor(doctor);
-            Link selfLink = linkTo(methodOn(DoctorController.class).createDoctor(createdDoctor)).withSelfRel();
+            Link selfLink = linkTo(methodOn(DoctorController.class).createDoctor(createdDoctor, null)).withSelfRel();
             Link getLink = linkTo(methodOn(DoctorController.class).getDoctor(createdDoctor.getId_doctor())).withRel("getDoctor").withType("GET");
             EntityModel<Doctor> resource = EntityModel.of(createdDoctor, selfLink, getLink);
             return ResponseEntity.status(HttpStatus.CREATED).body(resource); // 201 Created
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(null); // 409 Conflict
+        } catch (DuplicateKeyException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(createErrorMessage("Email already exists."));
         } catch (CustomException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorMessage(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createErrorMessage("Error creating doctor."));
         }
     }
 
@@ -54,7 +62,7 @@ public class DoctorController {
 
             return doctor.map(d -> {
                 Link selfLink = linkTo(methodOn(DoctorController.class).getDoctor(id)).withSelfRel();
-                Link updateLink = linkTo(methodOn(DoctorController.class).updateDoctor(id, null)).withRel("updateDoctor").withType("PUT");
+                Link updateLink = linkTo(methodOn(DoctorController.class).updateDoctor(id, null, null)).withRel("updateDoctor").withType("PUT");
                 Link deleteLink = linkTo(methodOn(DoctorController.class).deleteDoctor(id)).withRel("deleteDoctor").withType("DELETE");
                 Link searchLink = linkTo(methodOn(DoctorController.class).getBy(null, null)).withRel("searchDoctors").withType("GET");
 
@@ -82,10 +90,15 @@ public class DoctorController {
 //    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<Doctor>> updateDoctor(@PathVariable Long id, @RequestBody Doctor updatedDoctor) {
+    public ResponseEntity<?> updateDoctor(@PathVariable Long id, @Valid @RequestBody Doctor updatedDoctor, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(getValidationErrors(bindingResult));
+        }
+
         Doctor doctor = doctorService.updateDoctor(id, updatedDoctor);
         if (doctor != null) {
-            Link selfLink = linkTo(methodOn(DoctorController.class).updateDoctor(id, doctor)).withSelfRel();
+            Link selfLink = linkTo(methodOn(DoctorController.class).updateDoctor(id, doctor, null)).withSelfRel();
             Link getLink = linkTo(methodOn(DoctorController.class).getDoctor(doctor.getId_doctor())).withRel("getDoctor").withType("GET");
             EntityModel<Doctor> resource = EntityModel.of(doctor, selfLink, getLink);
             return ResponseEntity.ok(resource);
@@ -154,7 +167,7 @@ public class DoctorController {
                 .map(doctor -> EntityModel.of(doctor,
                         linkTo(methodOn(DoctorController.class).getBy(null, null)).withSelfRel(),
                         linkTo(methodOn(DoctorController.class).getDoctor(doctor.getId_doctor())).withRel("getDoctor").withType("GET"),
-                        linkTo(methodOn(DoctorController.class).updateDoctor(doctor.getId_doctor(), null)).withRel("updateDoctor").withType("PUT"),
+                        linkTo(methodOn(DoctorController.class).updateDoctor(doctor.getId_doctor(), null, null)).withRel("updateDoctor").withType("PUT"),
                         linkTo(methodOn(DoctorController.class).deleteDoctor(doctor.getId_doctor())).withRel("deleteDoctor").withType("DELETE")))
                 .toList();
             return ResponseEntity.ok(doctorResources);
@@ -181,7 +194,7 @@ public class DoctorController {
                     .map(doctor -> EntityModel.of(doctor,
                             linkTo(methodOn(DoctorController.class).getPaginatedDoctors(page, itemsPerPage)).withSelfRel(),
                             linkTo(methodOn(DoctorController.class).getDoctor(doctor.getId_doctor())).withRel("getDoctor").withType("GET"),
-                            linkTo(methodOn(DoctorController.class).updateDoctor(doctor.getId_doctor(), null)).withRel("updateDoctor").withType("PUT"),
+                            linkTo(methodOn(DoctorController.class).updateDoctor(doctor.getId_doctor(), null, null)).withRel("updateDoctor").withType("PUT"),
                             linkTo(methodOn(DoctorController.class).deleteDoctor(doctor.getId_doctor())).withRel("deleteDoctor").withType("DELETE")))
                     .collect(Collectors.toList());
 

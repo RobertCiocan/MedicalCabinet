@@ -1,0 +1,20 @@
+<div class="container">
+    <div class="text">
+      <h1 class="first-header">Add Consultation</h1>
+    </div>
+    <div class="content">
+      <div class="form-group">
+        <label for="selectPatient">Select Patient:</label>
+        <select class="form-control" id="selectPatient" [(ngModel)]="selectedPatientId">
+          <option *ngFor="let patient of patients" [value]="patient.id_patient">{{ patient.first_name }}</option>
+        </select>
+        <label>Date:</label>
+        <input type="datetime-local" [(ngModel)]="newConsultationDate" />
+      </div>
+  
+      <div class="btn">
+        <button class="btn btn-primary" (click)="createConsultation()">Create Consultation</button>
+      </div>
+    </div>
+  </div>
+  

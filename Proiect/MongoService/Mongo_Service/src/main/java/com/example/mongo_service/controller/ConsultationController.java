@@ -3,16 +3,20 @@ package com.example.mongo_service.controller;
 import com.example.mongo_service.model.Consultation;
 import com.example.mongo_service.model.Investigation;
 import com.example.mongo_service.view.ConsultationService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.mongo_service.utils.ValidationUtil.createErrorMessage;
+import static com.example.mongo_service.utils.ValidationUtil.getValidationErrors;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
@@ -26,20 +30,24 @@ public class ConsultationController {
     }
 
     @PostMapping("")
-    public ResponseEntity<EntityModel<Consultation>> createConsultation(@RequestBody Consultation consultation) {
+    public ResponseEntity<?> createConsultation(@Valid @RequestBody Consultation consultation, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorMessage("Validation failed", getValidationErrors(bindingResult)));
+        }
         try {
             System.out.println(consultation);
             Consultation createdConsultation = consultationService.createConsultation(consultation);
 
-            Link selfLink = linkTo(methodOn(ConsultationController.class).createConsultation(createdConsultation)).withSelfRel();
+            Link selfLink = linkTo(methodOn(ConsultationController.class).createConsultation(createdConsultation, null)).withSelfRel();
             Link getLink = linkTo(methodOn(ConsultationController.class).getConsultation(null)).withRel("getConsultation").withType("GET");
 
             EntityModel<Consultation> resource = EntityModel.of(createdConsultation, selfLink, getLink);
             return ResponseEntity.status(HttpStatus.CREATED).body(resource);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createErrorMessage("Bad Request", null)); // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorMessage("Internal Server Error", null)); // 500 Internal Server Error
         }
     }
 
@@ -50,7 +58,7 @@ public class ConsultationController {
 
             return consultation.map(c -> {
                 Link selfLink = linkTo(methodOn(ConsultationController.class).getConsultation(id)).withSelfRel();
-                Link updateLink = linkTo(methodOn(ConsultationController.class).updateConsultation(id, null)).withRel("updateConsultation").withType("PUT");
+                Link updateLink = linkTo(methodOn(ConsultationController.class).updateConsultation(id, null, null)).withRel("updateConsultation").withType("PUT");
                 Link deleteLink = linkTo(methodOn(ConsultationController.class).deleteConsultation(id)).withRel("deleteConsultation").withType("DELETE");
 
                 EntityModel<Consultation> resource = EntityModel.of(c, selfLink, updateLink, deleteLink);
@@ -87,7 +95,7 @@ public class ConsultationController {
             List<EntityModel<Consultation>> consultationResources = consultations.stream()
                     .map(consultation -> EntityModel.of(consultation,
                             linkTo(methodOn(ConsultationController.class).getConsultation(consultation.getId())).withSelfRel(),
-                            linkTo(methodOn(ConsultationController.class).updateConsultation(consultation.getId(), null)).withRel("updateConsultation").withType("PUT"),
+                            linkTo(methodOn(ConsultationController.class).updateConsultation(consultation.getId(), null, null)).withRel("updateConsultation").withType("PUT"),
                             linkTo(methodOn(ConsultationController.class).deleteConsultation(consultation.getId())).withRel("deleteConsultation").withType("DELETE")))
                     .toList();
 
@@ -100,15 +108,44 @@ public class ConsultationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<Consultation>> updateConsultation(@PathVariable String id, @RequestBody Consultation updatedConsultation) {
+    public ResponseEntity<?> updateConsultation(
+            @PathVariable String id,
+            @Valid @RequestBody Consultation updatedConsultation,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorMessage("Validation failed", getValidationErrors(bindingResult)));
+        }
         Consultation consultation = consultationService.updateConsultation(id, updatedConsultation);
         if (consultation != null) {
-            Link selfLink = linkTo(methodOn(ConsultationController.class).updateConsultation(id, consultation)).withSelfRel();
+            Link selfLink = linkTo(methodOn(ConsultationController.class).updateConsultation(id, consultation, null)).withSelfRel();
             Link getLink = linkTo(methodOn(ConsultationController.class).getConsultation(null)).withRel("getConsultation").withType("GET");
             EntityModel<Consultation> resource = EntityModel.of(consultation, selfLink, getLink);
             return ResponseEntity.ok(resource);
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}/investigations")
+    public ResponseEntity<EntityModel<Consultation>> addInvestigationToConsultation(@PathVariable String id, @RequestBody Investigation newInvestigation) {
+        try {
+            Consultation updatedConsultation = consultationService.addInvestigationToConsultation(id, newInvestigation);
+
+            if (updatedConsultation != null) {
+                Link selfLink = linkTo(methodOn(ConsultationController.class).getConsultation(id)).withSelfRel();
+                Link getLink = linkTo(methodOn(ConsultationController.class).getConsultation(null)).withRel("getConsultation").withType("GET");
+
+                EntityModel<Consultation> resource = EntityModel.of(updatedConsultation, selfLink, getLink);
+                return ResponseEntity.ok(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
         }
     }
 

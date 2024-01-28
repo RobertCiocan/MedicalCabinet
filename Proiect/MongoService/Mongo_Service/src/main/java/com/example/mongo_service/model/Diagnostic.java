@@ -1,5 +1,5 @@
 package com.example.mongo_service.model;
 
 public enum Diagnostic {
-    HEALTHY, SICK
+    HEALTHY, SICK, NOT_DIAGNOSED
 }

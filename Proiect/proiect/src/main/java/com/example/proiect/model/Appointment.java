@@ -2,12 +2,15 @@ package com.example.proiect.model;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity(name = "Appointment")
 @Table(name = "appointment")
@@ -18,7 +21,7 @@ public class Appointment {
     public Appointment() {
     }
 
-    public Appointment(Patient patient, Doctor doctor, LocalDate date, String status) {
+    public Appointment(Patient patient, Doctor doctor, LocalDateTime date, String status) {
         this.patient = patient;
         this.doctor = doctor;
         this.date = date;
@@ -35,6 +38,7 @@ public class Appointment {
     @JoinColumn(name = "id_patient")
     private Patient patient;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "id_doctor")
     @JsonIgnore
@@ -42,13 +46,24 @@ public class Appointment {
 
     @Getter
     @Basic
-    @Column ( name = "date" )
-    private LocalDate date;
+    @Column(name = "date")
+    @JsonFormat(pattern = "dd:MM:yyyy HH:mm")
+    private LocalDateTime date;
 
     @Getter
     @Basic
     @Column ( name = "status" )
     private String status;
+
+    @Getter
+    @Basic
+    @Column ( name = "id_doc" )
+    private Long id_doc;
+
+    @Getter
+    @Basic
+    @Column ( name = "id_pat" )
+    private Long id_pat;
 
     @JsonBackReference
     public Patient getPatient() {

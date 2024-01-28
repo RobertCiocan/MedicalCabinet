@@ -54,7 +54,7 @@ export class RegisterComponent{
             phone_number: this.registerForm.value.phoneNumber
           };
           if(client_request.id_user == "0"){
-            this.notificationMessage = 'Utilizatorul deja exista in baza de date';
+            this.notificationMessage = 'User already exists';
             return;
           }
           this.patientService.createPatient(client_request).subscribe(

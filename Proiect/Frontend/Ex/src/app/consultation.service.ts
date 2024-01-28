@@ -4,6 +4,8 @@ import { Observable, switchMap } from 'rxjs';
 import { Consultation } from './models/consultation.model';
 import { PatientService } from './patient.service';
 import { DoctorService } from './doctor.service';
+import { Investigation } from './models/investigation.model';
+import { ConsultationRequest } from './models/Requests/consultation-request';
 
 @Injectable({
   providedIn: 'root'
@@ -54,4 +56,29 @@ export class ConsultationService {
 
     return this.http.put(`${this.apiUrl}/${consultationId}`, { diagnostic: newDiagnostic }, { headers });
   }
+
+  createConsultation(newConsultation: ConsultationRequest): Observable<Consultation> {
+    const jwt = sessionStorage.getItem('jwt');
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${jwt}`
+    });
+
+    return this.http.post<any>(this.apiUrl, newConsultation, { headers });
+  }
+
+  addNewInvestigation(consultationId: string, newInvestigation: Investigation): Observable<any> {
+    const jwt = sessionStorage.getItem('jwt');
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${jwt}`
+    });
+
+    const url = `${this.apiUrl}/${consultationId}/investigations`;
+
+    return this.http.put<any>(url, newInvestigation, { headers });
+  }
+
 }

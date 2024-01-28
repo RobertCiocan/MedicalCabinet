@@ -1,6 +1,6 @@
 <div class="container">
     <div class="text">
-      <h1 class="first-header">Doctor Consultations</h1>
+      <h1 class="first-header"></h1>
     </div>
     <div class="content">
       <div *ngFor="let consultation of consultations">
@@ -29,13 +29,19 @@
         <label>Consultation:</label>
       <select [(ngModel)]="selectedConsultationId">
         <option *ngFor="let consultation of consultations" [value]="consultation.id">
-          {{ consultation.id }} {{ consultation.date }}
+          {{ consultation.id }} {{ consultation.date | date}}
         </option>
       </select>
       
-    <div class="btn">
-        <button (click)="addNewInvestigation()">Add New Investigation</button>
-      </div>
+      <label>Name:</label>
+        <input type="text" [(ngModel)]="newInvestigationName" />
+
+        <label>Duration:</label>
+        <input type="number" [(ngModel)]="newInvestigationDuration" />
+
+        <div class="btn">
+            <button (click)="addNewInvestigation()">Add New Investigation</button>
+        </div>
     </div>
   </div>
   

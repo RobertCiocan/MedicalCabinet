@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { GetIdResponse } from './models/Responses/getId-response';
 import { Appointment } from './models/appointment.model';
+import { Patient } from './models/patient.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,16 @@ export class PatientService {
   createPatient(patientRequest: PatientRequest): Observable<PatientRequest> {
     console.log(patientRequest);
     return this.http.post<PatientRequest>(`${this.apiUrl}`, patientRequest);
+  }
+
+  getPatient(patientId: string): Observable<Patient> {
+    const jwt = sessionStorage.getItem('jwt');
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${jwt}`
+    });
+    return this.http.get<Patient>(`${this.apiUrl}/${patientId}`, { headers });
   }
 
   public getAppointments(): Observable<Appointment[]> {

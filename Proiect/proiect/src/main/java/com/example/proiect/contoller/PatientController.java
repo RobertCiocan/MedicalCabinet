@@ -4,12 +4,14 @@ import com.example.proiect.model.Appointment;
 import com.example.proiect.utils.CustomException;
 import com.example.proiect.view.PatientService;
 import com.example.proiect.model.Patient;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.example.proiect.utils.ValidationUtil.createErrorMessage;
+import static com.example.proiect.utils.ValidationUtil.getValidationErrors;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
@@ -31,23 +35,27 @@ public class PatientController {
     }
 
     @PostMapping("")
-    public ResponseEntity<EntityModel<Patient>> createPatient(@RequestBody Patient patient) {
+    public ResponseEntity<?> createPatient(@Valid @RequestBody Patient patient, BindingResult bindingResult) {
         System.out.println("PatientController.createPatient");
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(getValidationErrors(bindingResult));
+        }
         try {
             if(patientService.getPatientByCnp(patient.getCnp()).isPresent()) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).build();  // 409 Conflict
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(createErrorMessage("Patient with the same CNP already exists."));
             }
             Patient createdPatient = patientService.createPatient(patient);
-            Link selfLink = linkTo(methodOn(PatientController.class).createPatient(createdPatient)).withSelfRel();
+            Link selfLink = linkTo(methodOn(PatientController.class).createPatient(createdPatient, null)).withSelfRel();
             Link getLink = linkTo(methodOn(PatientController.class).getPatient(createdPatient.getId_patient())).withRel("getPatient").withType("GET");
             EntityModel<Patient> resource = EntityModel.of(createdPatient, selfLink, getLink);
             return ResponseEntity.status(HttpStatus.CREATED).body(resource);
-        }catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();  // 409 Conflict
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(createErrorMessage("Data integrity violation."));
         } catch (CustomException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorMessage(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createErrorMessage("Bad request."));
         }
     }
 
@@ -121,42 +129,42 @@ public class PatientController {
         }
     }
 
-    @GetMapping("/getBy")
-    public ResponseEntity<List<EntityModel<Appointment>>> getAppointmentsForPatient(
-            @RequestParam(required = false, name = "patientId") Long patientId,
-            @RequestParam(required = false, name = "userId") Long userId) {
-        try {
-            if (patientId == null && userId == null) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            Set<Appointment> appointments;
-            if (patientId != null) {
-                appointments = patientService.getAppointmentsForPatient(patientId);
-            } else {
-                appointments = patientService.getAppointmentsForUser(userId);
-            }
-
-            if (appointments.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-
-            List<EntityModel<Appointment>> appointmentResources = appointments.stream()
-                    .map(appointment -> EntityModel.of(appointment,
-                            linkTo(methodOn(PatientController.class).getAppointmentsForPatient(patientId, null)).withSelfRel(),
-                            linkTo(methodOn(AppointmentController.class).getAppointment(appointment.getId_appointment())).withRel("getAppointment").withType("GET")))
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(appointmentResources);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
-        }
-    }
+//    @GetMapping("/getBy")
+//    public ResponseEntity<List<EntityModel<Appointment>>> getAppointmentsForPatient(
+//            @RequestParam(required = false, name = "patientId") Long patientId,
+//            @RequestParam(required = false, name = "userId") Long userId) {
+//        try {
+//            if (patientId == null && userId == null) {
+//                return ResponseEntity.badRequest().build();
+//            }
+//
+//            Set<Appointment> appointments;
+//            if (patientId != null) {
+//                appointments = patientService.getAppointmentsForPatient(patientId);
+//            } else {
+//                appointments = patientService.getAppointmentsForUser(userId);
+//            }
+//
+//            if (appointments.isEmpty()) {
+//                return ResponseEntity.noContent().build();
+//            }
+//
+//            List<EntityModel<Appointment>> appointmentResources = appointments.stream()
+//                    .map(appointment -> EntityModel.of(appointment,
+//                            linkTo(methodOn(PatientController.class).getAppointmentsForPatient(patientId, null)).withSelfRel(),
+//                            linkTo(methodOn(AppointmentController.class).getAppointment(appointment.getId_appointment())).withRel("getAppointment").withType("GET")))
+//                    .collect(Collectors.toList());
+//
+//            return ResponseEntity.ok(appointmentResources);
+//        } catch (IllegalArgumentException ex) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
+//        } catch (Exception ex) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
+//        }
+//    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<Patient>> updatePatient(@PathVariable Long id, @RequestBody Patient updatedPatient) {
+    public ResponseEntity<?> updatePatient(@PathVariable Long id, @RequestBody Patient updatedPatient) {
         Optional<Patient> patient = patientService.getPatientById(id);
         if (patient.isPresent()) {
             Patient updated = patientService.updatePatient(id, updatedPatient);

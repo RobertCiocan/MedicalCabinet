@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,5 +32,12 @@ public class Consultation {
         this.date = date;
         this.diagnostic = diagnostic;
         this.investigation = investigation;
+    }
+
+    public void addInvestigation(Investigation newInvestigation) {
+        if (this.investigation == null) {
+            this.investigation = new ArrayList<>();
+        }
+        this.investigation.add(newInvestigation);
     }
 }

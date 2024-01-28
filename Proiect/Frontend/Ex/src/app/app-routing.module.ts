@@ -8,6 +8,7 @@ import { AdminPageComponent } from './create-doctor/admin-page.component';
 import { AppointmentsDoctorComponent } from './appointments-doctor/appointments-doctor.component';
 import { PatientConsultationsComponent } from './consultations-patient/patient-consultations.component';
 import { ConsultationsDoctorComponent } from './consultations-doctor/consultations-doctor.component';
+import { AddConsultationComponent } from './add-consultation/add-consultation.component';
 
 const routes: Routes = [
   {
@@ -45,6 +46,10 @@ const routes: Routes = [
   {
     path: 'doctor-consultations',
     component:ConsultationsDoctorComponent
+  },
+  {
+    path: 'add-consultation',
+    component:AddConsultationComponent
   },
   {
     path: "**",
