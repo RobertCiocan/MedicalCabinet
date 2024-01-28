@@ -1,0 +1,44 @@
+<div class = "navbar">
+    <div class="container">
+        <a class="logo" href="#">
+            <img src="../../assets/Circular_Logo.png" alt="LOGO">
+        </a>
+        <ul class="menu">
+            <div *ngIf="hasRole()=='admin'">
+                <li><a class="underline" routerLink="/create-doctor" routerLinkActive="active-route">
+                    Create Doctor
+                </a></li>
+            </div>
+            <div *ngIf="hasRole()=='doctor'">
+                <li><a class="underline" routerLink="/doctor-appointments" routerLinkActive="active-route">
+                    appointments
+                </a></li>
+                <li><a class="underline" routerLink="/doctor-consultations" routerLinkActive="active-route">
+                    consultations
+                </a></li>
+            </div>
+            <div *ngIf="!isUserLoggedIn()">
+            <li><a class="underline" routerLink="/users/sign-in" routerLinkActive="active-route">
+                Sign In
+            </a></li>
+            <li><a class="underline" routerLink="/users/register" routerLinkActive="active-route">
+                Register
+            </a></li>
+            </div>
+            <div *ngIf="hasRole()=='user'">
+                <li><a class="underline" routerLink="/appointments" routerLinkActive="active-route">
+                    appointments
+                </a></li>
+                <li><a class="underline" routerLink="/consultations" routerLinkActive="active-route">
+                    consultations
+                </a></li>
+            </div>
+                
+            <div *ngIf="isUserLoggedIn()">
+                <li><a class="underline" (click)="logout()" routerLinkActive="active-route">
+                    Logout
+                </a></li>
+            </div>
+        </ul>
+    </div>
+</div>

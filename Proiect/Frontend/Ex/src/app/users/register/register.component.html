@@ -1,0 +1,49 @@
+<div class="container">
+  <div class = "text">
+      <h1 class="main-header">Register</h1>
+  </div>
+  <form [formGroup]="registerForm" (ngSubmit)="register()"  novalidate>
+    <div class = "content">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="username">username</label>
+        <input type="text" id="username" formControlName="username" required>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="email">email</label>
+        <input type="email" id="email" formControlName="email" required>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="password">password</label>
+        <input type="password" id="password" formControlName="password" required>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="firstName">first name</label>
+        <input type="text" id="firstName" formControlName="firstName" required>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="lastName">last Name</label>
+        <input type="text" id="lastName" formControlName="lastName" required>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="phoneNumber">Phone Number</label>
+        <input type="tel" id="phoneNumber" formControlName="phoneNumber" required>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="cnp">CNP</label>
+        <input type="number" id="cnp" formControlName="cnp" required>
+      </div>
+      <div class="btn">
+        <button type="submit" [disabled]="!registerForm.valid">Register</button>
+      </div>
+    </div>
+    <div *ngIf="notificationMessage" class="notification">
+      {{ notificationMessage }}
+    </div>
+  </form>
+</div>

@@ -63,6 +63,42 @@ public class ConsultationController {
         }
     }
 
+    @GetMapping(value = "")
+    public ResponseEntity<List<EntityModel<Consultation>>> getConsultations(
+            @RequestParam(name = "doctorId", required = false) Long doctorId,
+            @RequestParam(name = "patientId", required = false) Long patientId ) {
+        try {
+            List<Consultation> consultations;
+
+            System.out.println(doctorId);
+
+            if (patientId != null) {
+                consultations = consultationService.getConsultationsByPatientId(patientId);
+            } else if (doctorId != null) {
+                consultations = consultationService.getConsultationsByDoctorId(doctorId);
+            } else {
+                consultations = consultationService.getAllConsultations();
+            }
+
+            if (consultations.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+
+            List<EntityModel<Consultation>> consultationResources = consultations.stream()
+                    .map(consultation -> EntityModel.of(consultation,
+                            linkTo(methodOn(ConsultationController.class).getConsultation(consultation.getId())).withSelfRel(),
+                            linkTo(methodOn(ConsultationController.class).updateConsultation(consultation.getId(), null)).withRel("updateConsultation").withType("PUT"),
+                            linkTo(methodOn(ConsultationController.class).deleteConsultation(consultation.getId())).withRel("deleteConsultation").withType("DELETE")))
+                    .toList();
+
+            return ResponseEntity.ok(consultationResources);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+        }
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<EntityModel<Consultation>> updateConsultation(@PathVariable String id, @RequestBody Consultation updatedConsultation) {
         Consultation consultation = consultationService.updateConsultation(id, updatedConsultation);
@@ -88,30 +124,30 @@ public class ConsultationController {
         }
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<EntityModel<Consultation>>> getAllConsultations() {
-        try {
-            List<Consultation> consultations = consultationService.getAllConsultations();
-
-            if (consultations.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-
-            List<EntityModel<Consultation>> consultationResources = consultations.stream()
-                    .map(consultation -> EntityModel.of(consultation,
-                            linkTo(methodOn(ConsultationController.class).getAllConsultations()).withSelfRel(),
-                            linkTo(methodOn(ConsultationController.class).getConsultation(null)).withRel("getConsultation").withType("GET"),
-                            linkTo(methodOn(ConsultationController.class).updateConsultation(null, null)).withRel("updateConsultation").withType("PUT"),
-                            linkTo(methodOn(ConsultationController.class).deleteConsultation(null)).withRel("deleteConsultation").withType("DELETE")))
-                    .toList();
-
-            return ResponseEntity.ok(consultationResources);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
-        }
-    }
+//    @GetMapping("")
+//    public ResponseEntity<List<EntityModel<Consultation>>> getAllConsultations() {
+//        try {
+//            List<Consultation> consultations = consultationService.getAllConsultations();
+//
+//            if (consultations.isEmpty()) {
+//                return ResponseEntity.noContent().build();
+//            }
+//
+//            List<EntityModel<Consultation>> consultationResources = consultations.stream()
+//                    .map(consultation -> EntityModel.of(consultation,
+//                            linkTo(methodOn(ConsultationController.class).getAllConsultations()).withSelfRel(),
+//                            linkTo(methodOn(ConsultationController.class).getConsultation(null)).withRel("getConsultation").withType("GET"),
+//                            linkTo(methodOn(ConsultationController.class).updateConsultation(null, null)).withRel("updateConsultation").withType("PUT"),
+//                            linkTo(methodOn(ConsultationController.class).deleteConsultation(null)).withRel("deleteConsultation").withType("DELETE")))
+//                    .toList();
+//
+//            return ResponseEntity.ok(consultationResources);
+//        } catch (IllegalArgumentException ex) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+//        } catch (Exception ex) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+//        }
+//    }
 
     @GetMapping("/{id}/investigations")
     public ResponseEntity<List<EntityModel<Investigation>>> getInvestigationsForConsultation(@PathVariable String id) {

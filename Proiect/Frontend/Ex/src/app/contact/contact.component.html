@@ -1,0 +1,40 @@
+<div class="container">
+    <div class = "text">
+        <h1 class="main-header">How can we help?</h1>
+        <h3 class="second-header">Got a question?</h3>
+        <p class="description">We're here to help and answer any question you<br>
+        might have. We look forward to hearing from you</p>
+    </div>
+
+    <form [formGroup]="formGroup" (ngSubmit)="submitForm()">
+        <div class = "content">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+                <label>
+                    first name
+                </label>
+                <input type="text" formControlName="firstName" placeholder="Ion">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+                <label>
+                    last name
+                </label>
+                <input type="text" formControlName="lastName" placeholder="Popescu">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+                <label>
+                    email
+                </label>
+                <input type="text" formControlName="email" placeholder="ion.popescu@gmail.com">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+                <label>
+                    message
+                </label>
+                <textarea formControlName="message" placeholder="Write your message..."></textarea>
+            </div>
+            <div class="btn">
+                <button type="submit">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>

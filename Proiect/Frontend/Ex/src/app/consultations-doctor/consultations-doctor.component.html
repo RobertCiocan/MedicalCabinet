@@ -1,0 +1,41 @@
+<div class="container">
+    <div class="text">
+      <h1 class="first-header">Doctor Consultations</h1>
+    </div>
+    <div class="content">
+      <div *ngFor="let consultation of consultations">
+        <h3>Consultation ID: {{ consultation.id }}</h3>
+        <label>Date:</label>
+        <span>{{ consultation.date | date }}</span>
+        <br>
+        <label>Diagnostic:</label>
+        <select [(ngModel)]="consultation.diagnostic" (change)="updateConsultationDiagnostic(consultation.id, consultation.diagnostic)">
+          <option *ngFor="let diag of diagnostics" [value]="diag">{{ diag }}</option>
+        </select>  
+        <div *ngIf="consultation.investigation && consultation.investigation.length > 0">
+          <h4>Investigations:</h4>
+          <ul>
+            <li *ngFor="let investigation of consultation.investigation">
+              {{ investigation.name }} - Result: {{ investigation.result }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+        <div class="text">
+            <h3 class="first-header">Add a new investigation</h3>
+          </div>
+        <label>Consultation:</label>
+      <select [(ngModel)]="selectedConsultationId">
+        <option *ngFor="let consultation of consultations" [value]="consultation.id">
+          {{ consultation.id }} {{ consultation.date }}
+        </option>
+      </select>
+      
+    <div class="btn">
+        <button (click)="addNewInvestigation()">Add New Investigation</button>
+      </div>
+    </div>
+  </div>
+  

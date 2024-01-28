@@ -24,11 +24,14 @@ public class GrpcClient {
                 .build());
 //
         String token = authResponse.getToken();
-
-        AuthServiceOuterClass.ValidateResponse validateResponse = stub.validate(AuthServiceOuterClass.ValidateRequest.newBuilder()
-                        .setToken(token)
-                        .build());
         System.out.println(authResponse.getToken());
+
+        AuthServiceOuterClass.ValidateResponse validateResponse = stub.validate(
+                AuthServiceOuterClass.ValidateRequest.newBuilder()
+                        .setToken("Bearer " + token) // Include "Bearer " prefix
+                        .build());
+
+
         System.out.println(validateResponse.getIsValid());
 
 //        AuthServiceOuterClass.BlacklisResponse blacklisResponse = stub.setBlacklist(AuthServiceOuterClass.BlacklistRequest.newBuilder()

@@ -30,7 +30,13 @@ public class PatientService {
         return patientRepository.findById(id);
     }
 
+    public Optional<Patient> getPatientByCnp(String cnp) {
+        return patientRepository.findByCnp(cnp);
+    }
+
     public Patient createPatient(Patient patient) {
+        patient.setBirth_date(getBirthDateFromCnp(patient.getCnp()));
+        patient.set_active(true);
         patientRepository.save(patient);
         return patient;
     }
@@ -50,7 +56,7 @@ public class PatientService {
 
     public boolean deletePatient(Long id) {
         patientRepository.deleteById(id);
-        return getPatientById(id).isPresent();
+        return getPatientById(id).isEmpty();
     }
 
     public Set<Appointment> getAppointmentsByDateAndType(Long id, String date, String type) {
@@ -87,7 +93,17 @@ public class PatientService {
     public Set<Appointment> getAppointmentsForPatient(Long id) {
         if(getPatientById(id).isPresent())
             return getPatientById(id).get().getAppointments();
-        return new HashSet<Appointment>();
+        return new HashSet<>();
+    }
+
+    public Set<Appointment> getAppointmentsForUser(Long userId) {
+        Set<Appointment> appointments = new HashSet<>();
+        for (Patient patient : patientRepository.findAll()) {
+            if (patient.getId_user().equals(userId)) {
+                appointments.addAll(patient.getAppointments());
+            }
+        }
+        return appointments;
     }
 
     public LocalDate getBirthDateFromCnp(String cnp){
@@ -107,6 +123,15 @@ public class PatientService {
         } else {
             return null;
         }
+    }
+
+    public Long getPatientIdByUserId(Long userId) {
+        for (Patient patient : patientRepository.findAll()) {
+            if (patient.getId_user().equals(userId)) {
+                return patient.getId_patient();
+            }
+        }
+        return null;
     }
 }
 

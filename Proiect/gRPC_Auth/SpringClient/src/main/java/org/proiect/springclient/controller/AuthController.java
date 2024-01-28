@@ -89,8 +89,9 @@ public class AuthController {
                 return createErrorResponse(HttpStatus.BAD_REQUEST, "Username, password, and role must not be empty", "INVALID_INPUT");
             }
 
-
-
+            AuthServiceOuterClass.RegisterResponse response = AuthServiceOuterClass.RegisterResponse.newBuilder()
+                    .setUsername(request.getUsername())
+                    .build();
 
             Link selfLink = WebMvcLinkBuilder.linkTo(getClass()).slash("register").withSelfRel();
             Link parentLink = WebMvcLinkBuilder.linkTo(getClass()).withRel("parent");

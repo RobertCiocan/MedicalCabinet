@@ -32,18 +32,22 @@ public class PatientController {
 
     @PostMapping("")
     public ResponseEntity<EntityModel<Patient>> createPatient(@RequestBody Patient patient) {
+        System.out.println("PatientController.createPatient");
         try {
+            if(patientService.getPatientByCnp(patient.getCnp()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();  // 409 Conflict
+            }
             Patient createdPatient = patientService.createPatient(patient);
             Link selfLink = linkTo(methodOn(PatientController.class).createPatient(createdPatient)).withSelfRel();
             Link getLink = linkTo(methodOn(PatientController.class).getPatient(createdPatient.getId_patient())).withRel("getPatient").withType("GET");
             EntityModel<Patient> resource = EntityModel.of(createdPatient, selfLink, getLink);
             return ResponseEntity.status(HttpStatus.CREATED).body(resource);
         }catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(null); // 409 Conflict
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();  // 409 Conflict
         } catch (CustomException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
         }
     }
 
@@ -62,9 +66,9 @@ public class PatientController {
                 return ResponseEntity.ok(resource);
             }).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         }
     }
 
@@ -88,13 +92,12 @@ public class PatientController {
 
             return ResponseEntity.ok(patientResources);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         }
     }
 
-    // TODO: add links to appointments
     @GetMapping("/{id}/doctors")
     public ResponseEntity<List<EntityModel<Appointment>>> getAppointmentsForPatient(@PathVariable Long id) {
         try{
@@ -112,9 +115,43 @@ public class PatientController {
 
             return ResponseEntity.ok(appointmentResources);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
+        }
+    }
+
+    @GetMapping("/getBy")
+    public ResponseEntity<List<EntityModel<Appointment>>> getAppointmentsForPatient(
+            @RequestParam(required = false, name = "patientId") Long patientId,
+            @RequestParam(required = false, name = "userId") Long userId) {
+        try {
+            if (patientId == null && userId == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Set<Appointment> appointments;
+            if (patientId != null) {
+                appointments = patientService.getAppointmentsForPatient(patientId);
+            } else {
+                appointments = patientService.getAppointmentsForUser(userId);
+            }
+
+            if (appointments.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+
+            List<EntityModel<Appointment>> appointmentResources = appointments.stream()
+                    .map(appointment -> EntityModel.of(appointment,
+                            linkTo(methodOn(PatientController.class).getAppointmentsForPatient(patientId, null)).withSelfRel(),
+                            linkTo(methodOn(AppointmentController.class).getAppointment(appointment.getId_appointment())).withRel("getAppointment").withType("GET")))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(appointmentResources);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         }
     }
 
@@ -163,9 +200,30 @@ public class PatientController {
 
             return ResponseEntity.ok(appointmentResources);
         } catch (IllegalArgumentException ex) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         }
     }
+
+    @GetMapping(value="/patientId", produces="application/json")
+    public ResponseEntity<String> getPatientIdFromUserId(@RequestParam Long userId) {
+        System.out.println("PatientController.getPatientIdFromUserId");
+        try {
+            Long patientId = patientService.getPatientIdByUserId(userId);
+            System.out.println(patientId);
+
+            if (patientId != null) {
+                String jsonResponse = String.format("{\"uid\": %d}", patientId);
+                return ResponseEntity.ok(jsonResponse);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
+        }
+    }
+
 }

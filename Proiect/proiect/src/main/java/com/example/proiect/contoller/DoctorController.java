@@ -31,6 +31,7 @@ public class DoctorController {
 
     @PostMapping("")
     public ResponseEntity<EntityModel<Doctor>> createDoctor(@RequestBody Doctor doctor) {
+        System.out.println("DoctorController.createDoctor");
         try {
             Doctor createdDoctor = doctorService.createDoctor(doctor);
             Link selfLink = linkTo(methodOn(DoctorController.class).createDoctor(createdDoctor)).withSelfRel();
@@ -61,9 +62,9 @@ public class DoctorController {
                 return ResponseEntity.ok(resource);
             }).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.badRequest().build(); // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 500 Internal Server Error
         }
     }
 
@@ -124,9 +125,9 @@ public class DoctorController {
 
         return ResponseEntity.ok(appointmentResources);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 500 Internal Server Error
         }
     }
 
@@ -158,9 +159,9 @@ public class DoctorController {
                 .toList();
             return ResponseEntity.ok(doctorResources);
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         }
     }
 
@@ -187,9 +188,27 @@ public class DoctorController {
             return ResponseEntity.ok(paginatedDoctorResources);
 
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
+        }
+    }
+
+    @GetMapping(value="/doctorId", produces="application/json")
+    public ResponseEntity<String> getPatientIdFromUserId(@RequestParam Long userId) {
+        try {
+            Long doctorId = doctorService.getDoctorIdIdByUserId(userId);
+
+            if (doctorId != null) {
+                String jsonResponse = String.format("{\"uid\": %d}", doctorId);
+                return ResponseEntity.ok(jsonResponse);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         }
     }
 }

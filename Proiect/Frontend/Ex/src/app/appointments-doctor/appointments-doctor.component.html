@@ -1,0 +1,20 @@
+<div class="container">
+    <div class="text">
+      <h1 class="first-header"></h1>
+    </div>
+    <div class="content">
+      <div *ngFor="let appointment of appointments">
+        <h3>Appointment number {{ appointment.id_appointment }}</h3>
+        <label>Date:</label>
+        <span>{{ appointment.date }}</span>
+        <br>
+        <label>Status:</label>
+        <select [(ngModel)]="appointment.status" class='form-control' (ngModelChange)="updateStatus(appointment.id_appointment)">
+          <option value="scheduled">Scheduled</option>
+          <option value="ongoing">Ongoing</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  

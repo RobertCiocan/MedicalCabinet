@@ -1,0 +1,26 @@
+<div class="container">
+    <div class="text">
+      <h1 class="first-header">Your Consultations</h1>
+    </div>
+    <div class="content">
+      <div *ngFor="let consultation of consultations">
+        <h3>Consultation ID: {{ consultation.id }}</h3>
+        <label>Date:</label>
+        <span>{{ consultation.date | date }}</span>
+        <br>
+        <label>Diagnostic:</label>
+        <span>{{ consultation.diagnostic }}</span>
+  
+        <div *ngIf="consultation.investigation && consultation.investigation.length > 0">
+          <h4>Investigations:</h4>
+          <ul>
+            <li *ngFor="let investigation of consultation.investigation">
+              {{ investigation.name }} - Result: {{ investigation.result }}
+            </li>
+          </ul>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  

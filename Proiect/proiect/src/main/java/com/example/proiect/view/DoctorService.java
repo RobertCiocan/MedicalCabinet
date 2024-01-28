@@ -53,7 +53,7 @@ public class DoctorService {
 
     public boolean deleteDoctor(Long id) {
         doctorRepository.deleteById(id);
-        return getDoctorById(id).isPresent();
+        return getDoctorById(id).isEmpty();
     }
 
     public List<Doctor> getDoctorsBySpecialization(String specialization) {
@@ -81,5 +81,13 @@ public class DoctorService {
         return new HashSet<Appointment>();
     }
 
+    public Long getDoctorIdIdByUserId(Long userId) {
+        for (Doctor doctor : doctorRepository.findAll()) {
+            if (doctor.getId_user().equals(userId)) {
+                return doctor.getId_doctor();
+            }
+        }
+        return null;
+    }
 }
 

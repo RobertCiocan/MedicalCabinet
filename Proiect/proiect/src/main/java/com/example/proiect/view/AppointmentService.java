@@ -1,7 +1,10 @@
 package com.example.proiect.view;
 
 import com.example.proiect.model.Appointment;
+import com.example.proiect.model.Doctor;
 import com.example.proiect.repository.AppointmentRepository;
+import com.example.proiect.utils.BeanUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,23 +48,24 @@ public class AppointmentService {
     }
 
 
-    public Appointment updateAppointment(Long id, Optional<Appointment> updatedAppointment) {
+    public Appointment updateAppointment(Long id, Appointment updatedAppointment) {
 
         Optional<Appointment> existingAppointment = getAppointmentById(id);
-        if (existingAppointment.isPresent() && updatedAppointment.isPresent()) {
-            existingAppointment.get().setDate(updatedAppointment.get().getDate());
-            existingAppointment.get().setStatus(updatedAppointment.get().getStatus());
+        if (existingAppointment.isPresent()) {
+            Appointment appointmentToUpdate = existingAppointment.get();
 
-            appointmentRepository.save(existingAppointment.get());
+            BeanUtils.copyProperties(updatedAppointment, appointmentToUpdate, BeanUtil.getNullPropertyNames(updatedAppointment));
 
-            return existingAppointment.get();
+            appointmentRepository.save(appointmentToUpdate);
+
+            return appointmentToUpdate;
         }
         return null;
     }
 
     public boolean deleteAppointment(Long id) {
         appointmentRepository.deleteById(id);
-        return getAppointmentById(id).isPresent();
+        return getAppointmentById(id).isEmpty();
     }
 }
 

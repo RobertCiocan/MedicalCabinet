@@ -1,0 +1,37 @@
+
+<div class ="container">
+    <div class = "text">
+        <h1 class="second-header">Welcome to ACMedical</h1>
+        <h2 class="description">Glad to see you</h2>
+        <h1 class="main-header">Login to your account</h1>
+    </div>
+    
+    <form [formGroup]="signInForm" (ngSubmit)="signIn()">
+        <div class = "content">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+                <label>
+                    username
+                </label>
+                <input type="text" formControlName="username" placeholder="Username">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+                <label>
+                    password
+                </label>
+                <input type="password" formControlName="password" placeholder="Password">
+            </div>
+            <div *ngIf="invalidCredentials" class="error-message">
+                Invalid credentials. Please try again.
+            </div>
+            <div style="text-align: end; gap: 4px;">
+                <a class="links" routerLink="/password-recovery">Forgot your password?</a>
+            </div>
+            <div class="btn">
+                <button type="submit">Submit</button>
+            </div>
+            <div style="text-align: center; gap: 4px">
+                <a class="links" style="font-size: 16px;" routerLink="/register">Don't have an account?</a>
+            </div>
+        </div>
+    </form>
+</div>

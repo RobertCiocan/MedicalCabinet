@@ -30,6 +30,7 @@ public class AppointmentController {
 
     @PostMapping("")
     public ResponseEntity<EntityModel<Appointment>> createAppointment(@RequestBody Appointment appointment) {
+        System.out.println(appointment);
         try{
             Appointment createdAppointment = appointmentService.createAppointment(appointment);
 
@@ -40,11 +41,11 @@ public class AppointmentController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(resource);
         }catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(null); // 409 Conflict
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();  // 409 Conflict
         } catch (CustomException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
         }
     }
 
@@ -59,9 +60,9 @@ public class AppointmentController {
                 return ResponseEntity.ok(resource);
             }).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         }
     }
 
@@ -87,9 +88,9 @@ public class AppointmentController {
                 return ResponseEntity.notFound().build();
             }
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 400 Bad Request
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();  // 400 Bad Request
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // 500 Internal Server Error
         }
     }
 
@@ -102,11 +103,10 @@ public class AppointmentController {
     }
 
     @PutMapping("/{idAppointment}")
-    public ResponseEntity<EntityModel<Appointment>> updateAppointment(@PathVariable Long idAppointment) {
-        Optional<Appointment> updatedAppointment = appointmentService.getAppointmentById(idAppointment);
+    public ResponseEntity<EntityModel<Appointment>> updateAppointment(@PathVariable Long idAppointment, @RequestBody Appointment updatedAppointment) {
         Appointment appointment = appointmentService.updateAppointment(idAppointment, updatedAppointment);
         if (appointment != null) {
-            Link selfLink = linkTo(methodOn(AppointmentController.class).updateAppointment(idAppointment)).withSelfRel();
+            Link selfLink = linkTo(methodOn(AppointmentController.class).updateAppointment(idAppointment, updatedAppointment)).withSelfRel();
             Link getLink = linkTo(methodOn(AppointmentController.class).getAppointment(idAppointment)).withRel("getAppointment").withType("GET");
             EntityModel<Appointment> resource = EntityModel.of(appointment, selfLink, getLink);
             return ResponseEntity.ok(resource);
@@ -117,11 +117,17 @@ public class AppointmentController {
 
     @DeleteMapping("/{idAppointment}")
     public ResponseEntity<String> deleteAppointment(@PathVariable Long idAppointment) {
+        System.out.println("Deleting appointment with id: " + idAppointment);
         boolean deleted = appointmentService.deleteAppointment(idAppointment);
+
         if (deleted) {
-            return ResponseEntity.ok("Appointment deleted successfully.");
+            System.out.println("Appointment deleted successfully.");
+            String jsonResponse = "{\"message\": \"Appointment deleted successfully.\"}";
+            return ResponseEntity.ok(jsonResponse);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("{\"error\": \"Appointment not found.\"}");
         }
     }
+
 }

@@ -2,6 +2,7 @@ package com.example.mongo_service.view;
 
 import com.example.mongo_service.model.Consultation;
 import com.example.mongo_service.repository.ConsultationRepository;
+import com.example.mongo_service.utils.BeanUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class ConsultationService {
             Consultation consultationToUpdate = existingConsultation.get();
 
             // dupa ce am consultat documentatia am vazut ca exista deja BeanUtils.copyProperties
-            BeanUtils.copyProperties(updatedConsultation, consultationToUpdate);
+            BeanUtils.copyProperties(updatedConsultation, consultationToUpdate, BeanUtil.getNullPropertyNames(updatedConsultation));
 
             consultationRepository.save(consultationToUpdate);
 
@@ -56,4 +57,13 @@ public class ConsultationService {
             return false;
         }
     }
+
+    public List<Consultation> getConsultationsByPatientId(Long patientId) {
+        return consultationRepository.findByPatientId(patientId).orElse(null);
+    }
+
+    public List<Consultation> getConsultationsByDoctorId(Long doctorId) {
+        return consultationRepository.findByDoctorId(doctorId).orElse(null);
+    }
+
 }

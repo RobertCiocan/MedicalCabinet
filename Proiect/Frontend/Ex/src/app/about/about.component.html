@@ -1,0 +1,32 @@
+<div class="container">
+    <div class = "content">
+        <div class="text">
+        <h1 class="main-header">Despre Noi</h1>
+        <h3 class="second-header">Echipa Noastră, Locație și Despre Clinica Medicală</h3>
+        <p class="description">
+            Situată în inima unui cartier vibrant, "AC Medical" se remarcă prin serviciile sale medicale de înaltă calitate și abordarea dedicată față de sănătatea pacienților. 
+        </p>
+        <p class="description">
+            Echipa noastră de profesioniști experimentați și calificați se angajează să ofere îngrijiri medicale personalizate, adaptate nevoilor individuale ale fiecărui pacient.
+        </p>
+    
+        <div class="text">
+            <h2 class="section-header">Echipa Noastră</h2>
+            <ul>
+            <li *ngFor="let medicalStaff of medicalTeam">{{ medicalStaff }}</li>
+            </ul>
+        </div>
+    
+        <div class="text">
+            <h2 class="section-header">Locație</h2>
+            <p>{{ location }}</p>
+        </div>
+    
+        <div class="text">
+            <h2 class="section-header">Despre Clinica Medicală</h2>
+            <p>{{ aboutClinic }}</p>
+        </div>
+        </div>
+    </div>
+  </div>
+  

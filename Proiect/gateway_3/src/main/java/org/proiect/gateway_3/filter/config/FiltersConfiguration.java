@@ -1,9 +1,7 @@
 package org.proiect.gateway_3.filter.config;
 
 
-import org.proiect.gateway_3.filter.JwtValidationFilter;
-import org.proiect.gateway_3.filter.LoginFilter;
-import org.proiect.gateway_3.filter.OncePerRequestFilter;
+import org.proiect.gateway_3.filter.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,8 +19,12 @@ public class FiltersConfiguration {
     }
 
     @Bean
-    public LoginFilter loginFilter() {
-        return new LoginFilter();
+    public GRPcCallsFilter authGatewayFilter() {
+        return new GRPcCallsFilter();
+    }
+    @Bean
+    public SqlInjectionFilter sqlInjectionFilter() {
+        return new SqlInjectionFilter();
     }
 
     //TODO: add filter for data validation
